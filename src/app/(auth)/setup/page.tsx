@@ -43,6 +43,7 @@ export default function SetupPage() {
 			.from('profiles')
 			.update({
 				nickname: value,
+				profile_setup_completed: true,
 			})
 			.eq('id', user.id)
 

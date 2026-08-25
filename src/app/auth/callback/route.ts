@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
 	const { data: profile, error: profileError } = await supabase
 		.from('profiles')
-		.select('id, created_at')
+		.select('id, profile_setup_completed')
 		.eq('id', user.id)
 		.single()
 
@@ -44,22 +44,7 @@ export async function GET(request: Request) {
 		)
 	}
 
-	/*
-	 * Если профиль был создан одновременно с регистрацией
-	 * пользователя, отправляем его на страницу настройки.
-	 *
-	 * user.created_at — время создания аккаунта Auth
-	 * profile.created_at — время создания профиля
-	 */
-
-	const userCreatedAt = new Date(user.created_at).getTime()
-	const profileCreatedAt = new Date(profile.created_at).getTime()
-
-	const difference = Math.abs(userCreatedAt - profileCreatedAt)
-
-	const isNewUser = difference < 10_000
-
-	if (isNewUser) {
+	if (!profile.profile_setup_completed) {
 		return NextResponse.redirect(new URL('/setup', requestUrl.origin))
 	}
 
