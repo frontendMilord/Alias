@@ -23,6 +23,9 @@ export async function getLists() {
 			is_system,
 			created_at,
 			updated_at,
+      profiles!lists_owner_id_fkey (
+	      nickname
+      ),
 			list_words(count)
 		`,
 		)
@@ -63,6 +66,8 @@ export async function getLists() {
 		id: list.id,
 		name: list.name,
 		owner_id: list.owner_id,
+		owner_nickname:
+			(list.profiles as { nickname?: string | null })?.nickname ?? null,
 		description: list.description,
 		is_system: list.is_system,
 		created_at: list.created_at,

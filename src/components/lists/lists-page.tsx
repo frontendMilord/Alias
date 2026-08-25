@@ -2,13 +2,10 @@
 
 import { useState } from 'react'
 import { Search } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-
 import { ListCard } from './list-card'
 import { CreateListDialog } from './create-list-dialog'
-
 import type { List } from '@/types/list'
 
 type ListType = 'mine' | 'public' | 'shared'
@@ -54,11 +51,8 @@ export function ListsPage({ initialLists, userId }: ListsPageProps) {
 
 	const filteredLists = safeLists.filter((list) => {
 		const name = list?.name ?? ''
-
 		const matchesSearch = name.toLowerCase().includes(normalizedSearch)
-
 		const type = getListType(list)
-
 		const matchesType =
 			selectedTypes.length === 0 || selectedTypes.includes(type)
 
@@ -110,16 +104,13 @@ export function ListsPage({ initialLists, userId }: ListsPageProps) {
 						if (!list?.id) {
 							return null
 						}
-
 						const type = getListType(list)
-
 						return (
 							<ListCard
 								key={list.id}
 								id={list.id}
 								title={list.name ?? 'Без названия'}
-								//TODO
-								author={type === 'shared' ? '' : ''}
+								author={list.owner_nickname ?? ''}
 								wordsCount={list.words_count ?? 0}
 								description={list.description ?? null}
 								isSystem={list.is_system ?? false}
