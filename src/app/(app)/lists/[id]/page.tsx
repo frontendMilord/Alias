@@ -6,6 +6,7 @@ import { AddWordDialog } from '@/components/lists/add-word-dialog'
 import { pluralizeWordsCount } from '@/lib/utils'
 import { ListWords } from '@/components/lists/list-words'
 import { getListPermissions } from '@/lib/lists/get-list-permissions'
+import { getCurrentProfile } from '@/lib/auth/get-profile'
 
 const permissionLabels = {
 	can_view: 'Просмотр',
@@ -22,11 +23,11 @@ interface ListPageProps {
 
 export default async function ListPage({ params }: ListPageProps) {
 	const { id } = await params
+	const profile = await getCurrentProfile()
 
 	if (!id) {
 		notFound()
 	}
-
 	const [list, listWords, availableLists, permissions] = await Promise.all([
 		getList(id),
 		getListWords(id),
@@ -50,7 +51,7 @@ export default async function ListPage({ params }: ListPageProps) {
 				)}
 			</div>
 
-			{!!permissions && (
+			{!!permissions && list.owner_id !== profile?.id && (
 				<div className='mt-4 rounded-lg border bg-muted/30 p-3'>
 					<p className='mb-2 text-sm font-medium'>Разрешения</p>
 
