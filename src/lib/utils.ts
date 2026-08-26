@@ -1,5 +1,7 @@
+import { List } from '@/types/list'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { ListType } from './consts'
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -35,4 +37,16 @@ export const pluralizeWordsCount = (wordsCount: number): string => {
 	}
 
 	return `${wordsCount} ${wordForm}`
+}
+
+export const getListType = (list: List, userId: string): ListType => {
+	if (list?.is_system) {
+		return 'public'
+	}
+
+	if (list?.owner_id === userId) {
+		return 'mine'
+	}
+
+	return 'shared'
 }

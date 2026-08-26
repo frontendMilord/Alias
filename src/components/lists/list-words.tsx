@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input'
 import type { ListWord } from '@/lib/lists/get-list-words'
 import { WordItem } from './word-item'
 import { ListPermissions } from '@/lib/lists/get-list-permissions'
+import { WordDifficulty } from '@/types/word'
+import { difficultyLabels } from '@/lib/consts'
 
 interface ListWordsProps {
 	listId: string
@@ -15,25 +17,16 @@ interface ListWordsProps {
 	permissions: ListPermissions | null
 }
 
-const difficultyLabels = {
-	easy: 'Легкий',
-	medium: 'Средний',
-	hard: 'Сложный',
-	insane: 'Нереальный',
-} as const
-
-type Difficulty = keyof typeof difficultyLabels
-
 export function ListWords({ listId, listWords, permissions }: ListWordsProps) {
 	const [search, setSearch] = useState('')
 
 	const [selectedDifficulties, setSelectedDifficulties] = useState<
-		Difficulty[]
+		WordDifficulty[]
 	>([])
 
 	const safeListWords = Array.isArray(listWords) ? listWords : []
 
-	const toggleDifficulty = (value: Difficulty) => {
+	const toggleDifficulty = (value: WordDifficulty) => {
 		setSelectedDifficulties((current) => {
 			if (current.includes(value)) {
 				return current.filter((item) => item !== value)
@@ -86,7 +79,7 @@ export function ListWords({ listId, listWords, permissions }: ListWordsProps) {
 				<p className='text-sm font-medium'>Сложности</p>
 
 				<div className='flex flex-wrap gap-2'>
-					{(Object.keys(difficultyLabels) as Difficulty[]).map((value) => {
+					{(Object.keys(difficultyLabels) as WordDifficulty[]).map((value) => {
 						const checked = selectedDifficulties.includes(value)
 
 						return (

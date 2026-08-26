@@ -26,7 +26,15 @@ export async function getLists() {
       profiles!lists_owner_id_fkey (
 	      nickname
       ),
-			list_words(count)
+      list_words (
+        id,
+	      word_id,
+	      words (
+		      id,
+		      text,
+		      difficulty
+	      )
+      )
 		`,
 		)
 		.order('created_at', {
@@ -72,7 +80,6 @@ export async function getLists() {
 		is_system: list.is_system,
 		created_at: list.created_at,
 		updated_at: list.updated_at,
-		words_count: list.list_words?.[0]?.count ?? 0,
 		preview_words: safePreviewWords
 			.filter((word) => word?.list_id === list.id)
 			.map((word) => ({
@@ -80,5 +87,10 @@ export async function getLists() {
 				text: word.text,
 				difficulty: word.difficulty,
 			})),
+		words: list.list_words.map((word) => ({
+			id: word.id,
+			word_id: word.word_id,
+			word: word.words,
+		})),
 	}))
 }

@@ -15,5 +15,5 @@ export interface ListWord {
 	word_id: string
 	added_by: string
 	created_at: string
-	words: Word | null
+	word: Word | null
 }

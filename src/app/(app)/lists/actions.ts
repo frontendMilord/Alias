@@ -8,17 +8,6 @@ interface CreateListResult {
 	error?: string
 }
 
-interface AddWordInput {
-	text: string
-	difficulty: WordDifficulty
-	listIds: string[]
-}
-
-interface AddWordResult {
-	success: boolean
-	error?: string
-}
-
 export async function createList(name: string): Promise<CreateListResult> {
 	const supabase = await createClient()
 
@@ -330,7 +319,7 @@ export async function updateWord(
 	listId: string,
 	wordId: string,
 	text: string,
-	difficulty: 'easy' | 'medium' | 'hard' | 'insane',
+	difficulty: WordDifficulty,
 ) {
 	if (!listId) {
 		return {

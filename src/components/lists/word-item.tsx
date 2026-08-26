@@ -27,23 +27,16 @@ import {
 import { removeWordFromList } from '@/app/(app)/lists/actions'
 import { EditWordDialog } from './edit-word-dialog'
 import { ListPermissions } from '@/lib/lists/get-list-permissions'
-
-type Difficulty = 'easy' | 'medium' | 'hard' | 'insane'
+import { WordDifficulty } from '@/types/word'
+import { difficultyLabels } from '@/lib/consts'
 
 interface WordItemProps {
 	listId: string
 	id: string
 	text: string
-	difficulty: Difficulty
+	difficulty: WordDifficulty
 	listWordId: string
 	permissions: ListPermissions | null
-}
-
-const difficultyLabels: Record<Difficulty, string> = {
-	easy: 'Легкий',
-	medium: 'Средний',
-	hard: 'Сложный',
-	insane: 'Нереальный',
 }
 
 export function WordItem({

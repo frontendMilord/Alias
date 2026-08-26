@@ -31,12 +31,13 @@ import { EditListDialog } from './edit-list-dialog'
 import { ListPreviewWord } from '@/types/list'
 import { pluralizeWordsCount } from '@/lib/utils'
 import { ShareListDialog } from './share-list-dialog'
+import { ListWord } from '@/types/word'
 
 interface ListCardProps {
 	id: string
 	title: string
 	author: string
-	wordsCount: number
+	words: ListWord[]
 	type: 'mine' | 'public' | 'shared'
 	description?: string | null
 	isSystem?: boolean
@@ -47,7 +48,7 @@ export function ListCard({
 	id,
 	title,
 	author,
-	wordsCount,
+	words,
 	type,
 	description,
 	isSystem = false,
@@ -106,7 +107,7 @@ export function ListCard({
 						<h3 className='truncate font-medium'>{title || 'Без названия'}</h3>
 
 						<p className='mt-1 text-sm text-muted-foreground'>
-							{pluralizeWordsCount(wordsCount ?? 0)}
+							{pluralizeWordsCount(words.length ?? 0)}
 						</p>
 
 						<p className='mt-1 text-xs text-muted-foreground'>

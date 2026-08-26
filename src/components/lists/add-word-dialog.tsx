@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { addWords } from '@/app/(app)/lists/actions'
 import type { WordDifficulty } from '@/types/word'
 import { ListMultiSelect } from '@/lib/lists/list-multi-select'
+import { difficultyLabels } from '@/lib/consts'
 
 interface AvailableList {
 	id: string
@@ -162,10 +163,14 @@ export function AddWordDialog({ listId, availableLists }: AddWordDialogProps) {
 							disabled={loading}
 							className='flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm'
 						>
-							<option value='easy'>Легкий</option>
-							<option value='medium'>Средний</option>
-							<option value='hard'>Сложный</option>
-							<option value='insane'>Нереальный</option>
+							{Object.entries(difficultyLabels).map(([value, label]) => (
+								<option
+									key={value}
+									value={value}
+								>
+									{label}
+								</option>
+							))}
 						</select>
 					</div>
 

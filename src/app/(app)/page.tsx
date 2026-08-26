@@ -1,13 +1,15 @@
 import { requireUser } from '@/lib/auth/require-user'
+import { getActiveGame } from '@/lib/games/get-active-game'
+import { HomePage } from '@/components/home/home-page'
 
-export default async function HomePage() {
+export default async function Home() {
 	const profile = await requireUser()
+	const activeGame = await getActiveGame()
 
 	return (
-		<main className='p-6'>
-			<h1 className='text-2xl font-bold'>
-				Добро пожаловать, {profile.nickname}!
-			</h1>
-		</main>
+		<HomePage
+			nickname={profile.nickname}
+			activeGame={activeGame}
+		/>
 	)
 }

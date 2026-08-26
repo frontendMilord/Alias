@@ -23,23 +23,16 @@ import {
 } from '@/components/ui/select'
 
 import { updateWord } from '@/app/(app)/lists/actions'
-
-type Difficulty = 'easy' | 'medium' | 'hard' | 'insane'
+import { WordDifficulty } from '@/types/word'
+import { difficultyLabels } from '@/lib/consts'
 
 interface EditWordDialogProps {
 	wordId: string
 	initialText: string
-	initialDifficulty: Difficulty
+	initialDifficulty: WordDifficulty
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	listId: string
-}
-
-const difficultyLabels: Record<Difficulty, string> = {
-	easy: 'Легкий',
-	medium: 'Средний',
-	hard: 'Сложный',
-	insane: 'Нереальный',
 }
 
 export function EditWordDialog({
@@ -53,7 +46,8 @@ export function EditWordDialog({
 	const router = useRouter()
 
 	const [text, setText] = useState(initialText)
-	const [difficulty, setDifficulty] = useState<Difficulty>(initialDifficulty)
+	const [difficulty, setDifficulty] =
+		useState<WordDifficulty>(initialDifficulty)
 
 	const [isSaving, setIsSaving] = useState(false)
 	const [error, setError] = useState<string | null>(null)
@@ -137,7 +131,7 @@ export function EditWordDialog({
 
 						<Select
 							value={difficulty}
-							onValueChange={(value) => setDifficulty(value as Difficulty)}
+							onValueChange={(value) => setDifficulty(value as WordDifficulty)}
 							disabled={isSaving}
 						>
 							<SelectTrigger>
@@ -145,7 +139,7 @@ export function EditWordDialog({
 							</SelectTrigger>
 
 							<SelectContent>
-								{(Object.keys(difficultyLabels) as Difficulty[]).map(
+								{(Object.keys(difficultyLabels) as WordDifficulty[]).map(
 									(value) => (
 										<SelectItem
 											key={value}

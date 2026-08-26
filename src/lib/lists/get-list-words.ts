@@ -1,9 +1,10 @@
+import { WordDifficulty } from '@/types/word'
 import { createClient } from '../server'
 
 type SupabaseWord = {
 	id: string
 	text: string
-	difficulty: 'easy' | 'medium' | 'hard' | 'insane'
+	difficulty: WordDifficulty
 	owner_id: string
 	created_at: string
 	updated_at: string

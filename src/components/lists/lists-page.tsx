@@ -7,14 +7,8 @@ import { Input } from '@/components/ui/input'
 import { ListCard } from './list-card'
 import { CreateListDialog } from './create-list-dialog'
 import type { List } from '@/types/list'
-
-type ListType = 'mine' | 'public' | 'shared'
-
-const listTypeLabels: Record<ListType, string> = {
-	mine: 'Мои',
-	public: 'Общие',
-	shared: 'Доступ',
-}
+import { ListType, listTypeLabels } from '@/lib/consts'
+import { getListType } from '@/lib/utils'
 
 interface ListsPageProps {
 	initialLists: List[]
@@ -26,18 +20,6 @@ export function ListsPage({ initialLists, userId }: ListsPageProps) {
 	const [search, setSearch] = useState('')
 	const safeLists = Array.isArray(initialLists) ? initialLists : []
 	const normalizedSearch = search.trim().toLowerCase()
-
-	const getListType = (list: List): ListType => {
-		if (list?.is_system) {
-			return 'public'
-		}
-
-		if (list?.owner_id === userId) {
-			return 'mine'
-		}
-
-		return 'shared'
-	}
 
 	const toggleListType = (value: ListType) => {
 		setSelectedTypes((current) => {
@@ -52,7 +34,7 @@ export function ListsPage({ initialLists, userId }: ListsPageProps) {
 	const filteredLists = safeLists.filter((list) => {
 		const name = list?.name ?? ''
 		const matchesSearch = name.toLowerCase().includes(normalizedSearch)
-		const type = getListType(list)
+		const type = getListType(list, userId)
 		const matchesType =
 			selectedTypes.length === 0 || selectedTypes.includes(type)
 
@@ -104,14 +86,14 @@ export function ListsPage({ initialLists, userId }: ListsPageProps) {
 						if (!list?.id) {
 							return null
 						}
-						const type = getListType(list)
+						const type = getListType(list, userId)
 						return (
 							<ListCard
 								key={list.id}
 								id={list.id}
 								title={list.name ?? 'Без названия'}
 								author={list.owner_nickname ?? ''}
-								wordsCount={list.words_count ?? 0}
+								words={list.words}
 								description={list.description ?? null}
 								isSystem={list.is_system ?? false}
 								type={type}
