@@ -28,11 +28,17 @@ export async function getLists() {
       ),
       list_words (
         id,
+        list_id,
+        added_by,
+        created_at,
 	      word_id,
 	      words (
 		      id,
 		      text,
-		      difficulty
+		      difficulty,
+          created_at,
+          updated_at,
+          owner_id
 	      )
       )
 		`,
@@ -43,7 +49,6 @@ export async function getLists() {
 
 	if (error) {
 		console.error('Error fetching lists:', error)
-
 		return []
 	}
 
@@ -87,10 +92,17 @@ export async function getLists() {
 				text: word.text,
 				difficulty: word.difficulty,
 			})),
-		words: list.list_words.map((word) => ({
-			id: word.id,
-			word_id: word.word_id,
-			word: word.words,
-		})),
+		words: list.list_words.map((word) => {
+			const linkedWord = Array.isArray(word.words) ? word.words[0] : word.words
+
+			return {
+				id: word.id,
+				list_id: word.list_id,
+				added_by: word.added_by,
+				created_at: word.created_at,
+				word_id: word.word_id,
+				word: linkedWord,
+			}
+		}),
 	}))
 }

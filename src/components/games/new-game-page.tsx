@@ -573,23 +573,17 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 
 					<div className='rounded-lg border p-4'>
 						<h2 className='text-lg font-medium'>Настройки</h2>
-
 						<div className='mt-3 space-y-2 text-sm'>
 							<div className='flex justify-between gap-4'>
 								<span className='text-muted-foreground'>Очки для победы</span>
-
 								<span className='font-medium'>{targetScore}</span>
 							</div>
-
 							<div className='flex justify-between gap-4'>
 								<span className='text-muted-foreground'>Время раунда</span>
-
 								<span className='font-medium'>{roundDuration} сек</span>
 							</div>
-
 							<div className='flex justify-between gap-4'>
 								<span className='text-muted-foreground'>Сложности</span>
-
 								<span className='text-right font-medium'>
 									{selectedDifficulties.length === 0
 										? 'Все'
@@ -601,7 +595,6 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 
 							<div className='flex justify-between gap-4'>
 								<span className='text-muted-foreground'>Штраф за пропуск</span>
-
 								<span className='font-medium'>
 									{subtractPointForSkip ? 'Да' : 'Нет'}
 								</span>
@@ -611,7 +604,6 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 
 					<div className='rounded-lg border p-4'>
 						<h2 className='text-lg font-medium'>Слова</h2>
-
 						<div className='mt-3 space-y-2 text-sm'>
 							<div className='flex justify-between gap-4'>
 								<span className='text-muted-foreground'>Выбраны списки</span>
@@ -628,7 +620,6 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 										))}
 								</div>
 							</div>
-
 							<div className='flex justify-between gap-4'>
 								<span className='text-muted-foreground'>Выбрано слов</span>
 								<span className='font-bold'>{selectedWordsCount}</span>
