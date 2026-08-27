@@ -5,18 +5,13 @@ import { Plus, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-export interface TeamDraft {
-	id: string
-	name: string
-	players: string[]
-}
+import { GameTeamDraft } from '@/types/game'
 
 interface TeamEditorProps {
-	team: TeamDraft
+	team: GameTeamDraft
 	teamIndex: number
 	canDelete: boolean
-	onChange: (team: TeamDraft) => void
+	onChange: (team: GameTeamDraft) => void
 	onDelete: () => void
 }
 

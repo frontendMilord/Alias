@@ -2,10 +2,7 @@
 
 import { Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
-
 import { Button } from '@/components/ui/button'
-
-import { TeamEditor, type TeamDraft } from './team-editor'
 import { ListWord, WordDifficulty } from '@/types/word'
 import {
 	difficultyLabels,
@@ -17,8 +14,12 @@ import {
 import { List } from '@/types/list'
 import { Profile } from '@/types/profile'
 import { getListType, pluralizeWordsCount } from '@/lib/utils'
+import { GameTeamDraft } from '@/types/game'
+import { TeamEditor } from './team-editor'
+import { useRouter } from 'next/navigation'
+import { createGame } from '@/app/(app)/games/actions'
 
-function createTeam(index: number): TeamDraft {
+function createTeam(index: number): GameTeamDraft {
 	return {
 		id: crypto.randomUUID(),
 		name: `Команда ${index}`,
@@ -35,7 +36,7 @@ type GameStep = 1 | 2 | 3 | 4
 
 export function NewGamePage({ lists, profile }: NewGamePageProps) {
 	const [step, setStep] = useState<GameStep>(1)
-	const [teams, setTeams] = useState<TeamDraft[]>([
+	const [teams, setTeams] = useState<GameTeamDraft[]>([
 		createTeam(1),
 		createTeam(2),
 	])
@@ -49,6 +50,8 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 	const [subtractPointForSkip, setSubtractPointForSkip] = useState(true)
 	const [selectedLists, setSelectedLists] = useState<string[]>([])
 	const [selectedTypes, setSelectedTypes] = useState<ListType[]>([])
+	const router = useRouter()
+	const [isCreatingGame, setIsCreatingGame] = useState(false)
 	const filteredUniqueWords = useMemo(() => {
 		const words = new Map<string, ListWord>()
 
@@ -88,7 +91,7 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 	const selectedWordsCount = filteredUniqueWords.length
 	const [error, setError] = useState<string | null>(null)
 
-	const updateTeam = (updatedTeam: TeamDraft) => {
+	const updateTeam = (updatedTeam: GameTeamDraft) => {
 		setTeams((current) =>
 			current.map((team) => (team.id === updatedTeam.id ? updatedTeam : team)),
 		)
@@ -110,7 +113,7 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 		setError(null)
 	}
 
-	const validateTeams = (teams: TeamDraft[]): string | null => {
+	const validateTeams = (teams: GameTeamDraft[]): string | null => {
 		if (teams.length < 2) {
 			return 'Нужно минимум 2 команды'
 		}
@@ -252,12 +255,53 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 		if (selectedLists.length === 0) {
 			return 'Выберите хотя бы один список'
 		}
-
 		if (selectedWordsCount < 1) {
 			return 'В выбранных списках недостаточно слов для игры. Нужно минимум 1 слово.'
 		}
-
 		return null
+	}
+
+	const handleStartGame = async () => {
+		setError(null)
+		const teamsError = validateTeams(teams)
+		if (teamsError) {
+			setError(teamsError)
+			setStep(1)
+			return
+		}
+		const settingsError = validateGameSettings()
+		if (settingsError) {
+			setError(settingsError)
+			setStep(2)
+			return
+		}
+		const listsError = validateLists()
+		if (listsError) {
+			setError(listsError)
+			setStep(3)
+			return
+		}
+		setIsCreatingGame(true)
+		try {
+			const result = await createGame({
+				targetScore,
+				roundDurationSeconds: roundDuration,
+				subtractPointForSkip,
+				selectedDifficulties,
+				selectedLists,
+				teams,
+			})
+			if (!result.success || !result.gameId) {
+				setError(result.error ?? 'Не удалось создать игру.')
+				return
+			}
+			router.push(`/games/${result.gameId}`)
+		} catch (error) {
+			console.error('Error starting game:', error)
+			setError('Произошла ошибка при создании игры.')
+		} finally {
+			setIsCreatingGame(false)
+		}
 	}
 
 	return (
@@ -647,13 +691,22 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 					</Button>
 				)}
 
-				{step < 4 && (
+				{step < 4 ? (
 					<Button
 						type='button'
 						className='flex-1'
 						onClick={handleContinue}
 					>
 						Продолжить
+					</Button>
+				) : (
+					<Button
+						type='button'
+						className='flex-1'
+						onClick={handleStartGame}
+						disabled={isCreatingGame}
+					>
+						{isCreatingGame ? 'Создание игры...' : 'Начать игру'}
 					</Button>
 				)}
 			</div>
