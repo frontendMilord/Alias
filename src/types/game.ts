@@ -56,6 +56,7 @@ export interface FinishedGameSummary {
 	rounds: FinishedGameRoundSummary[]
 	guessedCount: number
 	skippedCount: number
+	teamStats: Record<string, { guessedCount: number; skippedCount: number; bestRoundScore: number }>
 }
 
 export interface Game {

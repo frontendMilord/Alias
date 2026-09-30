@@ -76,6 +76,11 @@ export function FinishedGamePanel({
 									{team.score} / {targetScore}
 								</p>
 							</div>
+							<div className='flex gap-3 text-xs text-muted-foreground'>
+								<span>Угадано: {summary?.teamStats[team.id]?.guessedCount ?? 0}</span>
+								<span>Пропущено: {summary?.teamStats[team.id]?.skippedCount ?? 0}</span>
+								<span>Лучший раунд: {summary?.teamStats[team.id]?.bestRoundScore ?? 0}</span>
+							</div>
 							<div className='flex flex-wrap gap-1.5'>
 								{team.players.map((player) => (
 									<span

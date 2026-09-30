@@ -203,6 +203,22 @@ export async function getGame(id: string): Promise<Game | null> {
 			})
 		} else {
 			const rounds = roundsData ?? []
+			const teamStats = rounds.reduce<Record<string, { guessedCount: number; skippedCount: number; bestRoundScore: number }>>(
+				(stats, round) => {
+					const current = stats[round.team_id] ?? {
+						guessedCount: 0,
+						skippedCount: 0,
+						bestRoundScore: Number.MIN_SAFE_INTEGER,
+					}
+					stats[round.team_id] = {
+						guessedCount: current.guessedCount + round.guessed_count,
+						skippedCount: current.skippedCount + round.skipped_count,
+						bestRoundScore: Math.max(current.bestRoundScore, round.points_earned),
+					}
+					return stats
+				},
+				{},
+			)
 			const createdAt = new Date(data.created_at).getTime()
 			const finishedAt = data.finished_at
 				? new Date(data.finished_at).getTime()
@@ -218,6 +234,7 @@ export async function getGame(id: string): Promise<Game | null> {
 				})),
 				guessedCount: rounds.reduce((total, round) => total + round.guessed_count, 0),
 				skippedCount: rounds.reduce((total, round) => total + round.skipped_count, 0),
+				teamStats,
 			}
 		}
 	}

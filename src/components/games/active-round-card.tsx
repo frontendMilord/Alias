@@ -79,7 +79,7 @@ export function ActiveRoundCard({
 		updateRemaining()
 		const interval = pausedAt
 			? undefined
-			: window.setInterval(updateRemaining, 1000)
+			: window.setInterval(updateRemaining, 250)
 		return () => {
 			if (interval !== undefined) window.clearInterval(interval)
 		}
@@ -189,7 +189,7 @@ export function ActiveRoundCard({
 					</div>
 				) : (
 					<div className='flex flex-1 items-center justify-center py-8 text-center'>
-						<p className='wrap-break-word text-5xl font-bold sm:text-6xl'>
+						<p className='max-w-full break-all text-center text-5xl font-bold sm:text-6xl'>
 							{word}
 						</p>
 					</div>
