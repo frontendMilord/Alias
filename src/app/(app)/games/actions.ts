@@ -50,9 +50,28 @@ export async function createGame(input: CreateGameInput): Promise<{
 		}
 	}
 	const selectedLists = [...new Set(input.selectedLists.filter(Boolean))]
-	const selectedDifficulties = [
+	const allDifficulties: WordDifficulty[] = [
+		'easy',
+		'medium',
+		'hard',
+		'insane',
+	]
+	const requestedDifficulties = [
 		...new Set(input.selectedDifficulties ?? []),
-	] as WordDifficulty[]
+	]
+	if (
+		requestedDifficulties.some(
+			(difficulty) => !allDifficulties.includes(difficulty),
+		)
+	) {
+		return {
+			success: false,
+			error: 'Выбрана неизвестная сложность слов.',
+		}
+	}
+	const selectedDifficulties = requestedDifficulties.length
+		? requestedDifficulties
+		: allDifficulties
 	// Проверяем команды
 	const normalizedTeams = input.teams.map((team) => ({
 		id: team.id,
