@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Alias — веб-приложение для игры в «Алиас»
 
-## Getting Started
+**Ссылки:** [Демо](https://aliasss.vercel.app) · [Репозиторий на GitHub](https://github.com/frontendMilord/Alias)
 
-First, run the development server:
+## О проекте
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Alias — веб-версия популярной командной игры «Алиас», в которой игроки объясняют слова, а остальные пытаются их угадать. Приложение работает прямо в браузере, не требует установки и доступно с компьютера и телефона. Вход в игру осуществляется через Google-аккаунт.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Проект создан как самостоятельный fullstack-проект: от продумывания интерфейса и архитектуры до настройки авторизации, работы с базой данных и деплоя.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Технологический стек
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Frontend**
 
-## Learn More
+- **Next.js 16** (App Router) — маршрутизация, серверные и клиентские компоненты
+- **React 19**
+- **TypeScript** — строгая типизация всего кода
+- **Tailwind CSS 4** — стилизация и адаптивная вёрстка
+- **shadcn/ui** и **Base UI** — доступные UI-компоненты
+- **Zustand** — управление состоянием приложения
+- **lucide-react** — иконки
+- `class-variance-authority`, `clsx`, `tailwind-merge` — управление вариантами стилей компонентов
 
-To learn more about Next.js, take a look at the following resources:
+**Backend / инфраструктура**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Supabase** — база данных (PostgreSQL) и авторизация
+- **Supabase Auth** — вход через Google (OAuth)
+- **@supabase/ssr** — работа с сессией пользователя на стороне сервера и клиента в Next.js
+- **Supabase CLI** — версионирование схемы БД (миграции в репозитории)
+- **Vercel** — хостинг и деплой
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Инструменты разработки**
 
-## Deploy on Vercel
+- ESLint, PostCSS, npm, Git / GitHub
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Что было сделано
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Разработано SPA-подобное приложение на Next.js (App Router) с разделением на серверные и клиентские компоненты
+- Реализована авторизация через Google с помощью Supabase Auth и серверной обработкой сессии
+- Спроектирована и подключена база данных Supabase, схема хранится в репозитории в виде миграций
+- Настроено глобальное состояние игры на Zustand
+- Сверстан адаптивный интерфейс на Tailwind CSS и shadcn/ui
+- Настроен деплой на Vercel
