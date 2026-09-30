@@ -47,7 +47,12 @@ export function FinishedGamePanel({
 							{winners.map((team) => `«${team.name}»`).join(', ')}
 						</p>
 						<p className='text-sm text-muted-foreground'>
-							{winningScore} {winningScore === 1 ? 'очко' : winningScore >= 2 && winningScore <= 4 ? 'очка' : 'очков'}
+							{winningScore}{' '}
+							{winningScore === 1
+								? 'очко'
+								: winningScore >= 2 && winningScore <= 4
+									? 'очка'
+									: 'очков'}
 						</p>
 					</div>
 					<div className='grid grid-cols-2 gap-3 text-sm'>
@@ -69,17 +74,15 @@ export function FinishedGamePanel({
 				</CardHeader>
 				<CardContent className='space-y-4'>
 					{teams.map((team) => (
-						<div key={team.id} className='space-y-2'>
+						<div
+							key={team.id}
+							className='space-y-2'
+						>
 							<div className='flex items-center justify-between gap-3'>
 								<p className='font-medium'>{team.name}</p>
 								<p className='font-semibold tabular-nums'>
 									{team.score} / {targetScore}
 								</p>
-							</div>
-							<div className='flex gap-3 text-xs text-muted-foreground'>
-								<span>Угадано: {summary?.teamStats[team.id]?.guessedCount ?? 0}</span>
-								<span>Пропущено: {summary?.teamStats[team.id]?.skippedCount ?? 0}</span>
-								<span>Лучший раунд: {summary?.teamStats[team.id]?.bestRoundScore ?? 0}</span>
 							</div>
 							<div className='flex flex-wrap gap-1.5'>
 								{team.players.map((player) => (
@@ -90,6 +93,18 @@ export function FinishedGamePanel({
 										{player.nickname}
 									</span>
 								))}
+							</div>
+							<div className='flex gap-3 text-xs text-muted-foreground'>
+								<span>
+									Угадано: {summary?.teamStats[team.id]?.guessedCount ?? 0}
+								</span>
+								<span>
+									Пропущено: {summary?.teamStats[team.id]?.skippedCount ?? 0}
+								</span>
+								<span>
+									Лучший раунд:{' '}
+									{summary?.teamStats[team.id]?.bestRoundScore ?? 0}
+								</span>
 							</div>
 						</div>
 					))}
@@ -119,7 +134,8 @@ export function FinishedGamePanel({
 							className='flex items-center justify-between gap-4 border-t pt-3'
 						>
 							<span className='text-muted-foreground'>
-								Раунд {round.roundNumber}, {teamNames.get(round.teamId) ?? 'Команда'}
+								Раунд {round.roundNumber},{' '}
+								{teamNames.get(round.teamId) ?? 'Команда'}
 							</span>
 							<span className='text-right font-medium tabular-nums'>
 								{round.pointsEarned > 0 ? '+' : ''}
@@ -131,11 +147,20 @@ export function FinishedGamePanel({
 			</Card>
 
 			<div className='grid gap-3 sm:grid-cols-2'>
-				<Link href='/' className={buttonVariants({ variant: 'outline', className: 'w-full' })}>
+				<Link
+					href='/'
+					className={buttonVariants({
+						variant: 'outline',
+						className: 'w-full',
+					})}
+				>
 					<Home />
 					На главную
 				</Link>
-				<Link href='/games/new' className={buttonVariants({ className: 'w-full' })}>
+				<Link
+					href='/games/new'
+					className={buttonVariants({ className: 'w-full' })}
+				>
 					<Plus />
 					Создать новую игру
 				</Link>
