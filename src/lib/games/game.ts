@@ -30,12 +30,12 @@ export async function getGame(id: string): Promise<Game | null> {
 			current_explainer_player_id,
 			created_at,
 			finished_at,
-			game_teams (
+			game_teams!game_teams_game_id_fkey (
 				id,
 				name,
 				team_order,
 				score,
-				game_players (
+				game_players!game_players_team_id_fkey (
 					id,
 					nickname,
 					player_order
@@ -48,7 +48,12 @@ export async function getGame(id: string): Promise<Game | null> {
 		.maybeSingle()
 
 	if (error) {
-		console.error('Error fetching game:', error)
+		console.error('Error fetching game:', {
+			code: error.code,
+			message: error.message,
+			details: error.details,
+			hint: error.hint,
+		})
 		return null
 	}
 

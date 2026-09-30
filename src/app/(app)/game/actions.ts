@@ -59,7 +59,7 @@ export async function cancelGame(gameId: string) {
 		}
 	}
 
-	const { error: updateError } = await supabase
+	const { data: cancelledGame, error: updateError } = await supabase
 		.from('games')
 		.update({
 			status: 'cancelled',
@@ -68,6 +68,8 @@ export async function cancelGame(gameId: string) {
 		.eq('id', gameId)
 		.eq('owner_id', user.id)
 		.eq('status', 'active')
+		.select('id')
+		.maybeSingle()
 
 	if (updateError) {
 		console.error('Error cancelling game:', updateError)
@@ -75,6 +77,13 @@ export async function cancelGame(gameId: string) {
 		return {
 			success: false,
 			error: 'Не удалось отменить игру',
+		}
+	}
+
+	if (!cancelledGame) {
+		return {
+			success: false,
+			error: 'Игра уже изменилась. Обновите страницу и попробуйте ещё раз.',
 		}
 	}
 

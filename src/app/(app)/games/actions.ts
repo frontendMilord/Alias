@@ -20,6 +20,29 @@ export async function createGame(input: CreateGameInput): Promise<{
 			error: 'Пользователь не авторизован.',
 		}
 	}
+	const activeGameError =
+		'У вас уже есть активная игра. Вернитесь на главную, чтобы продолжить её или отменить перед созданием новой.'
+	const { data: activeGame, error: activeGameLookupError } = await supabase
+		.from('games')
+		.select('id')
+		.eq('owner_id', user.id)
+		.eq('status', 'active')
+		.maybeSingle()
+
+	if (activeGameLookupError) {
+		console.error('Error checking for an active game:', activeGameLookupError)
+		return {
+			success: false,
+			error: 'Не удалось проверить активную игру.',
+		}
+	}
+
+	if (activeGame) {
+		return {
+			success: false,
+			error: activeGameError,
+		}
+	}
 	// Валидация
 	if (!Number.isInteger(input.targetScore) || input.targetScore < 1) {
 		return {
@@ -129,6 +152,16 @@ export async function createGame(input: CreateGameInput): Promise<{
 		.single()
 
 	if (gameError || !game) {
+		if (
+			gameError?.code === '23505' &&
+			gameError.message.includes('games_one_active_per_owner')
+		) {
+			return {
+				success: false,
+				error: activeGameError,
+			}
+		}
+
 		console.error('Error creating game:', gameError)
 		return {
 			success: false,
