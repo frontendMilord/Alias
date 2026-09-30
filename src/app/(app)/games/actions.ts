@@ -3,6 +3,220 @@
 import { createClient } from '@/lib/server'
 import { WordDifficulty } from '@/types/word'
 import type { CreateGameInput } from '@/types/game'
+import { revalidatePath } from 'next/cache'
+
+export async function startGameRound(gameId: string): Promise<{
+	success: boolean
+	roundId?: string
+	error?: string
+}> {
+	if (!gameId) {
+		return { success: false, error: 'Не указана игра.' }
+	}
+
+	const supabase = await createClient()
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser()
+
+	if (userError || !user) {
+		return { success: false, error: 'Пользователь не авторизован.' }
+	}
+
+	const { data: roundId, error } = await supabase.rpc('start_game_round', {
+		p_game_id: gameId,
+	})
+
+	if (error || !roundId) {
+		console.error('Error starting game round:', error)
+		return {
+			success: false,
+			error: error?.message.includes('No eligible words found')
+				? 'В выбранных списках нет слов выбранной сложности.'
+				: 'Не удалось начать раунд. Обновите страницу и попробуйте ещё раз.',
+		}
+	}
+
+	revalidatePath(`/games/${gameId}`)
+	return { success: true, roundId }
+}
+
+export async function beginPreparedGameRound(gameId: string): Promise<{
+	success: boolean
+	error?: string
+}> {
+	return updateRoundState(gameId, 'start_prepared_game_round')
+}
+
+export async function setGameRoundPaused(
+	gameId: string,
+	paused: boolean,
+): Promise<{ success: boolean; error?: string }> {
+	const supabase = await createClient()
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser()
+
+	if (userError || !user) {
+		return { success: false, error: 'Пользователь не авторизован.' }
+	}
+
+	const { error } = await supabase.rpc('set_game_round_paused', {
+		p_game_id: gameId,
+		p_paused: paused,
+	})
+
+	if (error) {
+		console.error('Error changing game round pause state:', error)
+		return { success: false, error: 'Не удалось изменить состояние таймера.' }
+	}
+
+	revalidatePath(`/games/${gameId}`)
+	return { success: true }
+}
+
+export async function resolveCurrentRoundWord(
+	gameId: string,
+	result: 'guessed' | 'skipped',
+): Promise<{ success: boolean; error?: string }> {
+	const supabase = await createClient()
+	const { data: authData, error: authError } = await supabase.auth.getUser()
+	if (authError || !authData.user) {
+		return { success: false, error: 'Пользователь не авторизован.' }
+	}
+
+	const { error } = await supabase.rpc('resolve_current_game_round_word', {
+		p_game_id: gameId,
+		p_result: result,
+	})
+	if (error) {
+		console.error('Error resolving current round word:', error)
+		return { success: false, error: 'Не удалось сохранить результат слова.' }
+	}
+
+	revalidatePath(`/games/${gameId}`)
+	return { success: true }
+}
+
+export async function expireCurrentRound(
+	gameId: string,
+): Promise<{ success: boolean; error?: string }> {
+	const supabase = await createClient()
+	const { data: authData, error: authError } = await supabase.auth.getUser()
+	if (authError || !authData.user) {
+		return { success: false, error: 'Пользователь не авторизован.' }
+	}
+
+	const { error } = await supabase.rpc('expire_current_game_round', {
+		p_game_id: gameId,
+	})
+	if (error) {
+		console.error('Error expiring game round:', error)
+		return { success: false, error: 'Не удалось завершить время раунда.' }
+	}
+
+	revalidatePath(`/games/${gameId}`)
+	return { success: true }
+}
+
+export async function assignSharedWordTeam(
+	gameId: string,
+	teamId: string,
+): Promise<{ success: boolean; error?: string }> {
+	const supabase = await createClient()
+	const { data: authData, error: authError } = await supabase.auth.getUser()
+	if (authError || !authData.user) {
+		return { success: false, error: 'Пользователь не авторизован.' }
+	}
+
+	const { error } = await supabase.rpc('assign_shared_game_round_word', {
+		p_game_id: gameId,
+		p_team_id: teamId,
+	})
+	if (error) {
+		console.error('Error assigning shared word:', error)
+		return { success: false, error: 'Не удалось сохранить команду.' }
+	}
+
+	revalidatePath(`/games/${gameId}`)
+	return { success: true }
+}
+
+export async function editRoundWordResult(
+	gameId: string,
+	wordId: string,
+	result: 'guessed' | 'skipped',
+): Promise<{ success: boolean; error?: string }> {
+	const supabase = await createClient()
+	const { data: authData, error: authError } = await supabase.auth.getUser()
+	if (authError || !authData.user) {
+		return { success: false, error: 'Пользователь не авторизован.' }
+	}
+
+	const { error } = await supabase.rpc('edit_game_round_word_result', {
+		p_game_id: gameId,
+		p_word_id: wordId,
+		p_result: result,
+	})
+	if (error) {
+		console.error('Error editing round word result:', error)
+		return { success: false, error: 'Не удалось изменить результат слова.' }
+	}
+
+	revalidatePath(`/games/${gameId}`)
+	return { success: true }
+}
+
+export async function goToNextRound(
+	gameId: string,
+): Promise<{ success: boolean; hasNextRound?: boolean; error?: string }> {
+	const supabase = await createClient()
+	const { data: authData, error: authError } = await supabase.auth.getUser()
+	if (authError || !authData.user) {
+		return { success: false, error: 'Пользователь не авторизован.' }
+	}
+
+	const { data: hasNextRound, error } = await supabase.rpc('next_game_round', {
+		p_game_id: gameId,
+	})
+	if (error) {
+		console.error('Error advancing game round:', error)
+		return { success: false, error: 'Не удалось перейти дальше.' }
+	}
+
+	revalidatePath(`/games/${gameId}`)
+	return { success: true, hasNextRound }
+}
+
+async function updateRoundState(
+	gameId: string,
+	functionName: 'start_prepared_game_round',
+): Promise<{ success: boolean; error?: string }> {
+	if (!gameId) {
+		return { success: false, error: 'Не указана игра.' }
+	}
+
+	const supabase = await createClient()
+	const {
+		data: { user },
+		error: userError,
+	} = await supabase.auth.getUser()
+
+	if (userError || !user) {
+		return { success: false, error: 'Пользователь не авторизован.' }
+	}
+
+	const { error } = await supabase.rpc(functionName, { p_game_id: gameId })
+	if (error) {
+		console.error('Error starting prepared game round:', error)
+		return { success: false, error: 'Не удалось запустить раунд. Обновите страницу.' }
+	}
+
+	revalidatePath(`/games/${gameId}`)
+	return { success: true }
+}
 
 export async function createGame(input: CreateGameInput): Promise<{
 	success: boolean

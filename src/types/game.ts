@@ -17,6 +17,32 @@ export interface GameTeam {
 	players: GamePlayer[]
 }
 
+export interface ActiveGameRound {
+	id: string
+	roundNumber: number
+	teamId: string
+	explainerPlayerId: string
+	status: Database['public']['Enums']['round_status']
+	startedAt: string | null
+	endedAt: string | null
+	pausedAt: string | null
+	pausedSeconds: number
+	pointsEarned: number
+	lastWordId: string | null
+	currentWord: string | null
+	currentWordId: string | null
+	words: GameRoundWord[]
+}
+
+export interface GameRoundWord {
+	id: string
+	wordText: string
+	displayedOrder: number
+	result: Database['public']['Enums']['word_result'] | null
+	guessedByTeamId: string | null
+	isLastWordForAll: boolean
+}
+
 export interface Game {
 	id: string
 	ownerId: string
@@ -32,6 +58,7 @@ export interface Game {
 	createdAt: string
 	finishedAt: string | null
 	teams: GameTeam[]
+	activeRound: ActiveGameRound | null
 }
 
 export interface GameTeamDraft {

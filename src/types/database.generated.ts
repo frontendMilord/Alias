@@ -100,6 +100,8 @@ export type Database = {
           id: string
           last_word_id: string | null
           points_earned: number
+          paused_at: string | null
+          paused_seconds: number
           round_number: number
           skipped_count: number
           started_at: string | null
@@ -115,6 +117,8 @@ export type Database = {
           id?: string
           last_word_id?: string | null
           points_earned?: number
+          paused_at?: string | null
+          paused_seconds?: number
           round_number: number
           skipped_count?: number
           started_at?: string | null
@@ -130,6 +134,8 @@ export type Database = {
           id?: string
           last_word_id?: string | null
           points_earned?: number
+          paused_at?: string | null
+          paused_seconds?: number
           round_number?: number
           skipped_count?: number
           started_at?: string | null
@@ -608,6 +614,34 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_list_owner: { Args: { p_list_id: string }; Returns: boolean }
+      assign_shared_game_round_word: {
+        Args: { p_game_id: string; p_team_id: string }
+        Returns: boolean
+      }
+      edit_game_round_word_result: {
+        Args: {
+          p_game_id: string
+          p_result: Database["public"]["Enums"]["word_result"]
+          p_word_id: string
+        }
+        Returns: boolean
+      }
+      expire_current_game_round: { Args: { p_game_id: string }; Returns: string }
+      next_game_round: { Args: { p_game_id: string }; Returns: boolean }
+      recalculate_game_round_scores: { Args: { p_game_id: string }; Returns: undefined }
+      resolve_current_game_round_word: {
+        Args: {
+          p_game_id: string
+          p_result: Database["public"]["Enums"]["word_result"]
+        }
+        Returns: string
+      }
+      set_game_round_paused: {
+        Args: { p_game_id: string; p_paused: boolean }
+        Returns: boolean
+      }
+      start_prepared_game_round: { Args: { p_game_id: string }; Returns: boolean }
+      start_game_round: { Args: { p_game_id: string }; Returns: string }
     }
     Enums: {
       game_status: "active" | "finished" | "cancelled"

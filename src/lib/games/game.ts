@@ -80,6 +80,58 @@ export async function getGame(id: string): Promise<Game | null> {
 		}
 	}
 
+	const { data: roundData, error: roundError } = await supabase
+		.from('game_rounds')
+		.select(
+			`
+			id,
+			round_number,
+			team_id,
+			explainer_player_id,
+			status,
+			started_at,
+			ended_at,
+			paused_at,
+			paused_seconds,
+			points_earned,
+			last_word_id,
+			round_words!round_words_round_id_fkey (
+				id,
+				word_text,
+				displayed_order,
+				result,
+				guessed_by_team_id,
+				is_last_word_for_all
+			)
+		`,
+		)
+		.eq('game_id', id)
+		.eq('round_number', data.current_round_number)
+		.maybeSingle()
+
+	if (roundError) {
+		console.error('Error fetching current game round:', {
+			code: roundError.code,
+			message: roundError.message,
+			details: roundError.details,
+			hint: roundError.hint,
+		})
+	}
+
+	const roundWords = [...(roundData?.round_words ?? [])]
+		.sort((a, b) => a.displayed_order - b.displayed_order)
+		.map((word) => ({
+			id: word.id,
+			wordText: word.word_text,
+			displayedOrder: word.displayed_order,
+			result: word.result,
+			guessedByTeamId: word.guessed_by_team_id,
+			isLastWordForAll: word.is_last_word_for_all,
+		}))
+	const currentWordEntry = roundData?.last_word_id
+		? roundWords.find((word) => word.id === roundData.last_word_id) ?? null
+		: roundWords.find((word) => word.result === null) ?? null
+
 	const teams = [...(data.game_teams ?? [])]
 		.sort((a, b) => a.team_order - b.team_order)
 		.map((team) => ({
@@ -111,5 +163,23 @@ export async function getGame(id: string): Promise<Game | null> {
 		createdAt: data.created_at,
 		finishedAt: data.finished_at,
 		teams,
+		activeRound: roundData
+			? {
+					id: roundData.id,
+					roundNumber: roundData.round_number,
+					teamId: roundData.team_id,
+					explainerPlayerId: roundData.explainer_player_id,
+					status: roundData.status,
+					startedAt: roundData.started_at,
+					endedAt: roundData.ended_at,
+					pausedAt: roundData.paused_at,
+					pausedSeconds: roundData.paused_seconds,
+					pointsEarned: roundData.points_earned,
+					lastWordId: roundData.last_word_id,
+					currentWord: currentWordEntry?.wordText ?? null,
+					currentWordId: currentWordEntry?.id ?? null,
+					words: roundWords,
+				}
+			: null,
 	}
 }

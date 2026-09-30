@@ -2,233 +2,285 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, Check, Clock3, Minus } from 'lucide-react'
 
+import { ActiveRoundCard } from '@/components/games/active-round-card'
+import { BeginRoundButton } from '@/components/games/begin-round-button'
+import { CloseGameButton } from '@/components/games/close-game-button'
+import { NextRoundButton } from '@/components/games/next-round-button'
+import { RoundResultsPanel } from '@/components/games/round-results-panel'
+import { SharedWordPanel } from '@/components/games/shared-word-panel'
+import { StartRoundButton } from '@/components/games/start-round-button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { difficultyLabels } from '@/lib/consts'
 import { getGame } from '@/lib/games/game'
 import { requireUser } from '@/lib/auth/require-user'
-import type { GameStatus } from '@/types/game'
+import type { GameStatus, GameTeam } from '@/types/game'
 
 interface GamePageProps {
-	params: Promise<{
-		id: string
-	}>
+	params: Promise<{ id: string }>
 }
 
 const statusLabels: Record<GameStatus, string> = {
 	active: 'Игра идёт',
-	finished: 'Завершена',
-	cancelled: 'Отменена',
+	finished: 'Игра завершена',
+	cancelled: 'Игра отменена',
 }
 
-function pluralizePlayers(count: number) {
-	const lastTwoDigits = count % 100
-	const lastDigit = count % 10
-
-	if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
-		return `${count} игроков`
-	}
-
-	if (lastDigit === 1) {
-		return `${count} игрок`
-	}
-
-	if (lastDigit >= 2 && lastDigit <= 4) {
-		return `${count} игрока`
-	}
-
-	return `${count} игроков`
+function TeamsCard({
+	teams,
+	targetScore,
+}: {
+	teams: GameTeam[]
+	targetScore: number
+}) {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>Команды</CardTitle>
+			</CardHeader>
+			<CardContent className='space-y-4'>
+				{teams.map((team) => (
+					<div
+						key={team.id}
+						className='space-y-2'
+					>
+						<div className='flex items-center justify-between gap-3'>
+							<p className='font-medium'>{team.name}</p>
+							<p className='font-semibold tabular-nums'>
+								{team.score} / {targetScore}
+							</p>
+						</div>
+						<div className='flex flex-wrap gap-1.5'>
+							{team.players.map((player) => (
+								<span
+									key={player.id}
+									className='rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground'
+								>
+									{player.nickname}
+								</span>
+							))}
+						</div>
+					</div>
+				))}
+			</CardContent>
+		</Card>
+	)
 }
 
 export default async function GamePage({ params }: GamePageProps) {
 	await requireUser()
 	const { id } = await params
 	const game = await getGame(id)
-
-	if (!game) {
-		notFound()
-	}
+	if (!game) notFound()
 
 	const currentTeam = game.teams.find((team) => team.id === game.currentTeamId)
 	const currentPlayer = currentTeam?.players.find(
 		(player) => player.id === game.currentExplainerPlayerId,
 	)
-	const roundMinutes = Math.floor(game.roundDurationSeconds / 60)
-	const roundSeconds = game.roundDurationSeconds % 60
+	const round = game.activeRound
+	const minutes = Math.floor(game.roundDurationSeconds / 60)
+	const seconds = game.roundDurationSeconds % 60
+	const lastWord = round?.words.find((word) => word.id === round.lastWordId)
+	const lastWordTeamId = lastWord?.guessedByTeamId ?? null
+	const explainingPlayer = game.teams
+		.flatMap((team) => team.players)
+		.find((player) => player.id === round?.explainerPlayerId)
 
 	return (
-		<main className='mx-auto flex min-h-screen w-full max-w-[640px] flex-col gap-6 px-4 py-6'>
-			<Link
-				href='/'
-				className='inline-flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground'
-			>
-				<ArrowLeft className='size-4' />
-				К играм
-			</Link>
-
-			<header className='space-y-2'>
-				<div className='flex flex-wrap items-center gap-3'>
-					<h1 className='text-2xl font-semibold'>Игра</h1>
-					<span className='rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground'>
+		<main className='mx-auto flex min-h-screen w-full max-w-[640px] flex-col gap-5 px-4 py-6'>
+			<header className='flex items-start justify-between gap-4'>
+				<div>
+					<Link
+						href='/'
+						className='mb-3 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground'
+					>
+						<ArrowLeft className='size-4' /> К играм
+					</Link>
+					<h1 className='text-2xl font-semibold'>
+						Игра · Раунд {game.currentRoundNumber}
+					</h1>
+					<p className='mt-1 text-sm text-muted-foreground'>
 						{statusLabels[game.status]}
-					</span>
+					</p>
 				</div>
-				<p className='text-sm text-muted-foreground'>
-					Создана {new Date(game.createdAt).toLocaleString('ru-RU', {
-						dateStyle: 'long',
-						timeStyle: 'short',
-					})}
-				</p>
+				{game.status === 'active' ? (
+					<CloseGameButton gameId={game.id} />
+				) : (
+					<Link
+						href='/'
+						aria-label='На главную'
+						className='rounded-md p-2 text-muted-foreground hover:bg-muted'
+					>
+						×
+					</Link>
+				)}
 			</header>
 
-			<section className='grid grid-cols-2 gap-3'>
-				<Card size='sm'>
-					<CardContent className='flex items-center gap-3'>
-						<div className='rounded-lg bg-muted p-2'>
-							<Check className='size-4' />
-						</div>
-						<div>
-							<p className='text-xs text-muted-foreground'>Цель</p>
-							<p className='font-semibold'>{game.targetScore} очков</p>
-						</div>
-					</CardContent>
-				</Card>
-
-				<Card size='sm'>
-					<CardContent className='flex items-center gap-3'>
-						<div className='rounded-lg bg-muted p-2'>
-							<Clock3 className='size-4' />
-						</div>
-						<div>
-							<p className='text-xs text-muted-foreground'>Время раунда</p>
-							<p className='font-semibold'>
-								{roundMinutes > 0 ? `${roundMinutes} мин ` : ''}
-								{roundSeconds > 0 ? `${roundSeconds} сек` : ''}
-							</p>
-						</div>
-					</CardContent>
-				</Card>
-			</section>
-
-			<Card>
-				<CardHeader>
-					<CardTitle>Команды</CardTitle>
-				</CardHeader>
-				<CardContent className='space-y-4'>
-					{game.teams.map((team) => {
-						const progress = Math.min(
-							100,
-							(team.score / game.targetScore) * 100,
-						)
-
-						return (
-							<div
-								key={team.id}
-								className='space-y-2 rounded-lg border p-3'
-							>
-								<div className='flex items-start justify-between gap-4'>
-									<div className='min-w-0'>
-										<h2 className='truncate font-medium'>{team.name}</h2>
-										<p className='text-xs text-muted-foreground'>
-											{pluralizePlayers(team.players.length)}
-										</p>
-									</div>
-									<p className='shrink-0 text-lg font-semibold'>
-										{team.score}
-										<span className='text-sm font-normal text-muted-foreground'>
-											/{game.targetScore}
-										</span>
-									</p>
-								</div>
-								<div
-									role='progressbar'
-									aria-label={`Счёт команды ${team.name}`}
-									aria-valuemin={0}
-									aria-valuemax={game.targetScore}
-									aria-valuenow={team.score}
-									className='h-1.5 overflow-hidden rounded-full bg-muted'
-								>
-									<div
-										className='h-full rounded-full bg-primary transition-[width]'
-										style={{ width: `${progress}%` }}
-									/>
-								</div>
-								<ul className='flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground'>
-									{team.players.map((player) => (
-										<li key={player.id}>{player.nickname}</li>
-									))}
-								</ul>
+			{game.status === 'active' && !round && (
+				<>
+					<TeamsCard
+						teams={game.teams}
+						targetScore={game.targetScore}
+					/>
+					<Card>
+						<CardHeader>
+							<CardTitle>Настройки</CardTitle>
+						</CardHeader>
+						<CardContent className='space-y-3 text-sm'>
+							<div className='flex justify-between gap-4'>
+								<span className='text-muted-foreground'>Очки для победы</span>
+								<span className='font-medium'>{game.targetScore}</span>
 							</div>
-						)
-					})}
-				</CardContent>
-			</Card>
+							<div className='flex justify-between gap-4'>
+								<span className='text-muted-foreground'>Время раунда</span>
+								<span className='font-medium'>
+									{minutes > 0 ? `${minutes} мин ` : ''}
+									{seconds} сек
+								</span>
+							</div>
+							<div className='flex justify-between gap-4'>
+								<span className='text-muted-foreground'>Сложности</span>
+								<span className='text-right font-medium'>
+									{game.selectedDifficulties
+										.map((difficulty) => difficultyLabels[difficulty])
+										.join(', ')}
+								</span>
+							</div>
+							<div className='flex items-center justify-between gap-4'>
+								<span className='flex items-center gap-2 text-muted-foreground'>
+									Штраф за пропуск
+								</span>
+								<span className='font-medium'>
+									{game.subtractPointForSkip ? 'Да' : 'Нет'}
+								</span>
+							</div>
+						</CardContent>
+					</Card>
+					<Card>
+						<CardHeader>
+							<CardTitle>Слова</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className='flex flex-wrap gap-1.5'>
+								{game.selectedLists.map((list) => (
+									<span
+										key={list.id}
+										className='rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground'
+									>
+										{list.name}
+									</span>
+								))}
+							</div>
+						</CardContent>
+					</Card>
+					<StartRoundButton gameId={game.id} />
+				</>
+			)}
 
-			<section className='grid gap-3 sm:grid-cols-2'>
-				<Card size='sm'>
-					<CardHeader>
-						<CardTitle>Правила</CardTitle>
-					</CardHeader>
-					<CardContent className='space-y-2 text-sm'>
-						<p>Раунд {game.currentRoundNumber}</p>
-						<p className='flex items-center gap-2 text-muted-foreground'>
-							{game.subtractPointForSkip ? (
-								<Minus className='size-4' />
-							) : (
-								<Check className='size-4' />
-							)}
-							{game.subtractPointForSkip
-								? 'Штраф за пропуск'
-								: 'Без штрафа за пропуск'}
-						</p>
-						{currentTeam && (
+			{game.status === 'active' && round?.status === 'preparation' && (
+				<>
+					<TeamsCard
+						teams={game.teams}
+						targetScore={game.targetScore}
+					/>
+					<Card>
+						<CardHeader>
+							<CardTitle>Подготовка раунда {round.roundNumber}</CardTitle>
+						</CardHeader>
+						<CardContent className='space-y-3'>
 							<p className='text-muted-foreground'>
-								Ход команды «{currentTeam.name}»
-								{currentPlayer ? ` — объясняет ${currentPlayer.nickname}` : ''}
+								Таймер: {minutes > 0 ? `${minutes} мин ` : ''}
+								{seconds} сек. Начнётся после нажатия кнопки.
+							</p>
+							<p>
+								Ход команды «{currentTeam?.name ?? '—'}», объясняет{' '}
+								{currentPlayer?.nickname ?? '—'}.
+							</p>
+						</CardContent>
+					</Card>
+					<BeginRoundButton gameId={game.id} />
+				</>
+			)}
+
+			{game.status === 'active' &&
+				round?.status === 'active' &&
+				!round.endedAt && (
+					<>
+						<p className='text-center text-lg font-medium'>
+							Ход команды «{currentTeam?.name ?? '—'}», объясняет{' '}
+							{currentPlayer?.nickname ?? '—'}.
+						</p>
+						{round.startedAt ? (
+							<ActiveRoundCard
+								word={round.currentWord ?? 'Все слова использованы'}
+								wordId={round.currentWordId ?? ''}
+								startedAt={round.startedAt}
+								durationSeconds={game.roundDurationSeconds}
+								pausedAt={round.pausedAt}
+								pausedSeconds={round.pausedSeconds}
+								gameId={game.id}
+								guessedCount={round.words.filter((word) => word.result === 'guessed').length}
+								skippedCount={round.words.filter((word) => word.result === 'skipped').length}
+							/>
+						) : (
+							<p className='text-center text-muted-foreground'>
+								Раунд ожидает запуска.
 							</p>
 						)}
-					</CardContent>
-				</Card>
+					</>
+				)}
 
-				<Card size='sm'>
-					<CardHeader>
-						<CardTitle>Сложность слов</CardTitle>
-					</CardHeader>
-					<CardContent className='flex flex-wrap gap-2'>
-						{game.selectedDifficulties.map((difficulty) => (
-							<span
-								key={difficulty}
-								className='rounded-full bg-muted px-3 py-1 text-xs'
-							>
-								{difficultyLabels[difficulty]}
-							</span>
-						))}
-					</CardContent>
-				</Card>
-			</section>
+			{game.status === 'active' &&
+				round?.status === 'active' &&
+				round.endedAt &&
+				round.currentWord && (
+					<SharedWordPanel
+						gameId={game.id}
+						word={round.currentWord}
+						teams={game.teams.map(({ id: teamId, name }) => ({
+							id: teamId,
+							name,
+						}))}
+						currentTeamId={null}
+					/>
+				)}
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Списки слов</CardTitle>
-				</CardHeader>
-				<CardContent>
-					{game.selectedLists.length > 0 ? (
-						<ul className='space-y-2'>
-							{game.selectedLists.map((list) => (
-								<li
-									key={list.id}
-									className='rounded-lg border px-3 py-2 text-sm'
-								>
-									{list.name}
-								</li>
-							))}
-						</ul>
-					) : (
-						<p className='text-sm text-muted-foreground'>
-							Не удалось загрузить названия выбранных списков.
+			{(round?.status === 'result' || round?.status === 'finished') && (
+				<>
+					<TeamsCard
+						teams={game.teams}
+						targetScore={game.targetScore}
+					/>
+					<RoundResultsPanel
+						gameId={game.id}
+						roundNumber={round.roundNumber}
+						words={round.words}
+						pointsEarned={round.pointsEarned}
+						explainingTeam={game.teams.find((team) => team.id === round.teamId)}
+						explainingPlayerName={explainingPlayer?.nickname}
+						teams={game.teams}
+						lastWordId={round.lastWordId}
+						lastWordTeamId={lastWordTeamId}
+						canAdvance={game.status === 'active' && round.status === 'result'}
+					/>
+					{game.status === 'finished' && (
+						<p className='text-center font-semibold'>
+							Игра завершена — достигнута цель по очкам.
 						</p>
 					)}
-				</CardContent>
-			</Card>
+				</>
+			)}
+
+			{game.status === 'finished' && !round && (
+				<>
+					<p className='text-center font-semibold'>Игра завершена.</p>
+					<TeamsCard
+						teams={game.teams}
+						targetScore={game.targetScore}
+					/>
+				</>
+			)}
+
+			{game.status === 'cancelled' && <p>Эта игра отменена.</p>}
 		</main>
 	)
 }
