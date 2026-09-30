@@ -20,8 +20,9 @@
 - **lucide-react** — иконки
 - ESLint (flat config), без Prettier — форматирование см. в разделе «Конвенции»
 
-Авторизация — Google OAuth через Supabase Auth. `src/lib/middleware.ts` редиректит
-неавторизованных пользователей на `/login` (кроме `/login`, `/auth/*`, `/oauth/consent`).
+Авторизация — Google OAuth через Supabase Auth. `src/proxy.ts` экспортирует `proxy`
+и вызывает `updateSession` из `src/lib/middleware.ts`; там обновляется сессия и
+обрабатываются редиректы на `/login` (кроме публичных маршрутов).
 
 ## Структура проекта
 
@@ -41,9 +42,9 @@ src/
         actions.ts               — createGame (server action)
       lists/
         page.tsx / [id]/page.tsx — списки слов (свои/публичные/расшаренные)
-      game/                    — ЛЕГАСИ, отдельно от games/. Осталась только
-                                  cancelGame (server action) + пустая заглушка
-                                  page.tsx. Основная логика игр — в games/.
+      game/                    — ЛЕГАСИ, отдельно от games/. Содержит `cancelGame`
+                                  (используется главной страницей) и пустую
+                                  заглушку `page.tsx`. Основная логика игр — в games/.
     admin/page.tsx            — заглушка для роли admin
     auth/callback/route.ts    — обмен OAuth code → сессия, редирект на /setup или /
     layout.tsx                — root layout, шрифты Geist, тема dark
@@ -73,27 +74,64 @@ src/
 
 ## Модель данных (Supabase)
 
-Таблиц-миграций в репозитории нет (схема управляется через Supabase dashboard/CLI
-отдельно от кода) — актуальная структура восстановлена по запросам в коде:
+Снимок типов схемы удалённого проекта `public` получен через Supabase CLI
+`gen types --linked` и хранится в `src/types/database.generated.ts`. Это источник
+актуальных таблиц, колонок, связей, RPC и enum для типов. SQL-миграции пока не
+выгружены: `db pull` и `db dump` требуют Docker/Podman в текущей CLI-сборке.
+`supabase/schema.sql` сейчас пустой. RLS, политики, функции и триггеры проверены
+read-only запросом системного каталога связанной базы 2026-09-30; TypeScript-типы
+сами по себе эту часть схемы не описывают.
 
-- `profiles` — id, nickname, avatar_url, role (`user` | `admin`), profile_setup_completed
+- `profiles` — id, nickname, avatar_url, role, profile_setup_completed, created_at, updated_at
 - `lists` — id, name, description, owner_id, is_system, created_at, updated_at
-- `words` — id, text, difficulty (`easy|medium|hard|insane`), owner_id
-- `list_words` — связь list ↔ word, added_by
-- `list_permissions` — list_id, user_id, can_view/can_add_words/can_edit_words/can_delete_words
+- `words` — id, text, difficulty, owner_id, created_at, updated_at
+- `list_words` — id, list_id, word_id, added_by, created_at
+- `list_permissions` — id, list_id, user_id, can_view/can_add_words/can_edit_words/can_delete_words, created_at, updated_at
+- `list_share_links` — id, list_id, token, created_by, права доступа, expires_at, created_at
 - `games` — id, owner_id, status, target_score, round_duration_seconds,
-  subtract_point_for_skip, selected_difficulties (jsonb), selected_lists (jsonb),
+  subtract_point_for_skip, selected_difficulties, selected_lists,
   current_round_number, current_team_id, current_explainer_player_id,
   created_at, finished_at
-  - **`status`**: подтверждённые значения — `active`, `cancelled` (см. `cancelGame` в
-    `game/actions.ts`). Значение для «игра успешно завершена по очкам» ещё
-    **не подтверждено в коде** — не факт что `finished`, возможно `completed`.
-    Проверить в Supabase перед реализацией логики завершения игры.
-- `game_teams` — id, game_id, name, team_order, score
-- `game_players` — id, team_id, nickname, player_order
-- `game_difficulties` — game_id, difficulty (дублирует `games.selected_difficulties`)
-- `game_lists` — game_id, list_id (дублирует `games.selected_lists`)
-- RPC `get_list_preview_words(p_list_ids)` — превью слов для карточек списков
+- `game_teams` — id, game_id, name, team_order, score, created_at
+- `game_players` — id, team_id, nickname, player_order, created_at
+- `game_difficulties` — id, game_id, difficulty
+- `game_lists` — id, game_id, list_id
+- `game_rounds` — id, game_id, team_id, explainer_player_id, round_number, status,
+  started_at, ended_at, guessed_count, skipped_count, points_earned, last_word_id, created_at
+- `round_words` — id, round_id, word_id, word_text (снимок текста), difficulty,
+  displayed_order, result, guessed_by_team_id, is_last_word_for_all, created_at
+- Enum `game_status`: `active`, `finished`, `cancelled`; `round_status`:
+  `preparation`, `active`, `result`, `finished`; `user_role`: `user`, `admin`;
+  `word_difficulty`: `easy`, `medium`, `hard`, `insane`; `word_result`:
+  `guessed`, `skipped`, `last_word`.
+- RPC: `can_add_list_words`, `can_add_to_list`, `can_delete_list_words`,
+  `can_edit_list_words`, `can_view_list`, `get_list_preview_words`, `is_admin`,
+  `is_list_owner`.
+- **RLS:** включён на всех 13 таблицах `public`; `FORCE ROW LEVEL SECURITY` не
+  включён. Доступ для списков и слов ограничен владельцем, системными списками,
+  администратором и правами из `list_permissions`. `list_words` проверяет права
+  на просмотр/добавление/удаление. Профили доступны на чтение всем
+  аутентифицированным пользователям, изменять их могут владелец профиля и admin.
+  Игры доступны владельцу (и admin на чтение); команды, игроки, раунды и слова
+  раунда ограничены владельцем игры (admin — на чтение). Для `game_lists` и
+  `game_difficulties` обнаружены только политики INSERT владельцем игры.
+  Для `list_share_links` SELECT разрешён владельцу списка или создателю ссылки,
+  INSERT/DELETE — владельцу списка.
+- **Функции и триггеры:** `on_auth_user_created` на `auth.users` вызывает
+  `public.handle_new_user()` (SECURITY DEFINER, фиксированный `search_path=public`)
+  и создаёт профиль из OAuth metadata. `update_updated_at()` обновляет timestamp;
+  триггеры стоят на `profiles`, `lists`, `words`, `list_permissions`. Функции
+  проверки прав списка и `is_admin`/`is_list_owner` — SECURITY DEFINER с
+  `search_path=public`; `get_list_preview_words` возвращает до трёх случайных слов
+  из каждого запрошенного списка.
+- **Нужно исправить:** политика `words_update_by_list_permission` объявлена для
+  `PUBLIC`, разрешает UPDATE при праве редактирования слова через список, но её
+  `WITH CHECK (owner_id = owner_id)` является тавтологией и не сохраняет владельца.
+  Проверка привилегий подтвердила UPDATE на всю таблицу и `owner_id` у ролей
+  `anon` и `authenticated`; RLS-предикат ограничивает фактический доступ, но
+  аутентифицированный редактор расшаренного списка может сменить `owner_id`.
+  Исправить колонковые права или использовать проверяемую RPC/trigger-логику,
+  сохраняющую владельца, и покрыть это тестом.
 
 ## Что уже реализовано
 
@@ -109,10 +147,9 @@ src/
    `game_players`, `game_difficulties`, `game_lists`).
 5. **Главная страница**: показывает активную игру владельца, позволяет начать
    новую (с подтверждением отмены текущей — `cancelGame`).
-6. **Страница игры** (`games/[id]/page.tsx`) — **первая версия, без запуска
-   раунда**: получение игры через `getGame(id)` (команды со счётом, игроки,
-   настройки, названия выбранных списков), отображение состояния, кнопка
-   «Начать раунд» пока неактивна (заглушка).
+6. **Страница игры** (`games/[id]/page.tsx`) — получение игры через `getGame(id)`
+   (команды со счётом, игроки, настройки, названия выбранных списков) и отображение
+   состояния. Механика запуска/проведения раунда пока не реализована.
 
 ## Что дальше (по плану)
 
@@ -121,8 +158,11 @@ src/
 - Обновление статуса игры на «завершена» по достижении `target_score`.
 - Реалтайм-синхронизация состояния игры между участниками (Supabase Realtime
   подключений пока в коде нет).
-- Разобраться с легаси-папкой `src/app/(app)/game/` (singular) — либо удалить,
-  либо перенести `cancelGame` в `games/actions.ts` для консистентности.
+- Разобраться с легаси-папкой `src/app/(app)/game/` (singular): сейчас там
+  находится `cancelGame`, используемый главной страницей. При переносе обновить
+  импорты; решить, нужна ли заглушка маршрута `/game`.
+- Сверить описание Supabase-схемы с фактической схемой проекта и зафиксировать
+  проверенные таблицы, поля, enum/check-значения, RPC, RLS и внешние ключи.
 
 ## Конвенции кода
 
