@@ -66,6 +66,7 @@ export async function getGame(id: string): Promise<Game | null> {
 		: []
 
 	let selectedLists: Game['selectedLists'] = []
+	let selectedWordsCount = 0
 
 	if (selectedListIds.length > 0) {
 		const { data: listsData, error: listsError } = await supabase
@@ -77,6 +78,35 @@ export async function getGame(id: string): Promise<Game | null> {
 			console.error('Error fetching game lists:', listsError)
 		} else if (listsData) {
 			selectedLists = listsData
+		}
+	}
+
+	if (selectedListIds.length > 0) {
+		const { data: listWordsData, error: listWordsError } = await supabase
+			.from('list_words')
+			.select('word_id')
+			.in('list_id', selectedListIds)
+
+		if (listWordsError) {
+			console.error('Error fetching game list words:', listWordsError)
+		} else {
+			const wordIds = [...new Set((listWordsData ?? []).map((word) => word.word_id))]
+			if (wordIds.length > 0) {
+				const { data: wordsData, error: wordsError } = await supabase
+					.from('words')
+					.select('id, difficulty')
+					.in('id', wordIds)
+
+				if (wordsError) {
+					console.error('Error fetching game words:', wordsError)
+				} else {
+					selectedWordsCount = (wordsData ?? []).filter(
+						(word) =>
+							data.selected_difficulties.length === 0 ||
+							data.selected_difficulties.includes(word.difficulty),
+					).length
+				}
+			}
 		}
 	}
 
@@ -157,6 +187,7 @@ export async function getGame(id: string): Promise<Game | null> {
 		subtractPointForSkip: data.subtract_point_for_skip,
 		selectedDifficulties: data.selected_difficulties ?? [],
 		selectedLists,
+		selectedWordsCount,
 		currentRoundNumber: data.current_round_number,
 		currentTeamId: data.current_team_id,
 		currentExplainerPlayerId: data.current_explainer_player_id,

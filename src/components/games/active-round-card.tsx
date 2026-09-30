@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Circle, CircleCheck } from 'lucide-react'
+import { Circle, CircleCheck, Pause, Play } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -150,13 +150,19 @@ export function ActiveRoundCard({
 		<Card className='flex min-h-[calc(100vh-12rem)] flex-1 flex-col border-primary/40'>
 			<CardHeader className='flex flex-row items-center justify-between gap-4'>
 				<CardTitle>Слово для объяснения</CardTitle>
-				<output
-					aria-label='Оставшееся время раунда'
-					aria-live='off'
-					className='font-mono text-xl font-semibold tabular-nums'
+				<Button
+					type='button'
+					variant='ghost'
+					size='sm'
+					className='h-auto gap-1 px-2 font-mono text-xl font-semibold tabular-nums'
+					disabled={isUpdatingPause || remainingSeconds === 0}
+					onClick={handlePause}
+					aria-label={isPaused ? 'Продолжить раунд' : 'Поставить раунд на паузу'}
+					title={isPaused ? 'Продолжить раунд' : 'Поставить раунд на паузу'}
 				>
-					{formatTime(remainingSeconds)}
-				</output>
+					{isPaused ? <Play className='size-4' /> : <Pause className='size-4' />}
+					<output aria-live='off'>{formatTime(remainingSeconds)}</output>
+				</Button>
 			</CardHeader>
 			<CardContent
 				className='flex flex-1 touch-none select-none flex-col gap-y-2'
@@ -218,20 +224,6 @@ export function ActiveRoundCard({
 					<p className='mb-4 text-center text-sm text-muted-foreground'>
 						Все слова использованы. Таймер продолжает идти.
 					</p>
-				)}
-				{remainingSeconds > 0 && (
-					<Button
-						variant='outline'
-						className='w-full'
-						disabled={isUpdatingPause}
-						onClick={handlePause}
-					>
-						{isUpdatingPause
-							? 'Обновляем таймер...'
-							: isPaused
-								? 'Продолжить'
-								: 'Пауза'}
-					</Button>
 				)}
 				{error && <p className='text-sm text-destructive'>{error}</p>}
 				{remainingSeconds === 0 && (

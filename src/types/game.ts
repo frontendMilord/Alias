@@ -52,6 +52,7 @@ export interface Game {
 	subtractPointForSkip: boolean
 	selectedDifficulties: WordDifficulty[]
 	selectedLists: { id: string; name: string }[]
+	selectedWordsCount: number
 	currentRoundNumber: number
 	currentTeamId: string | null
 	currentExplainerPlayerId: string | null

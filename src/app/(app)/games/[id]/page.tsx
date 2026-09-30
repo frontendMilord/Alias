@@ -170,6 +170,10 @@ export default async function GamePage({ params }: GamePageProps) {
 									</span>
 								))}
 							</div>
+							<div className='mt-4 flex justify-between gap-4 text-sm'>
+								<span className='text-muted-foreground'>Выбрано слов</span>
+								<span className='font-bold'>{game.selectedWordsCount}</span>
+							</div>
 						</CardContent>
 					</Card>
 					<StartRoundButton gameId={game.id} />

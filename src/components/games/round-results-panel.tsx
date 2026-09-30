@@ -89,7 +89,9 @@ export function RoundResultsPanel({
 				</CardHeader>
 				<CardContent className='space-y-3'>
 					{usedWords.length === 0 && (
-						<p className='text-sm text-muted-foreground'>В раунде нет отмеченных слов.</p>
+						<p className='text-sm text-muted-foreground'>
+							Нет угаданных или пропущенных слов.
+						</p>
 					)}
 					{usedWords.map((word) => {
 						const guessed = word.result === 'guessed'
