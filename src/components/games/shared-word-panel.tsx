@@ -34,7 +34,7 @@ export function SharedWordPanel({
 	allowClose = false,
 }: SharedWordPanelProps) {
 	const router = useRouter()
-	const [open, setOpen] = useState(!allowClose)
+	const [open, setOpen] = useState(false)
 	const [isSaving, setIsSaving] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const currentTeam = teams.find((team) => team.id === currentTeamId)
@@ -73,20 +73,16 @@ export function SharedWordPanel({
 								: 'Выберите угадавшую команду.'
 							: 'Время вышло. Все команды могут отгадать это слово.'}
 					</p>
-					{allowClose && (
-						<Button variant='outline' className='w-full' onClick={() => setOpen(true)}>
-							Изменить угадавшую команду
-						</Button>
-					)}
+					<Button variant='outline' className='w-full' onClick={() => setOpen(true)}>
+						{allowClose
+							? 'Изменить угадавшую команду'
+							: 'Выбрать угадавшую команду'}
+					</Button>
 				</CardContent>
 			</Card>
 			<AlertDialog
 				open={open}
-				onOpenChange={(nextOpen) => {
-					if (allowClose || !nextOpen) {
-						if (allowClose) setOpen(nextOpen)
-					}
-				}}
+				onOpenChange={setOpen}
 			>
 				<AlertDialogContent>
 					<AlertDialogHeader>

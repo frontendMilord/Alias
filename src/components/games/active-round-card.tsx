@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Circle, CircleCheck } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -51,7 +52,8 @@ export function ActiveRoundCard({
 		Math.max(
 			0,
 			Math.ceil(
-				(new Date(startedAt).getTime() + (durationSeconds + pausedSeconds) * 1000 -
+				(new Date(startedAt).getTime() +
+					(durationSeconds + pausedSeconds) * 1000 -
 					new Date(pausedAt ?? Date.now()).getTime()) /
 					1000,
 			),
@@ -59,13 +61,15 @@ export function ActiveRoundCard({
 	)
 
 	useEffect(() => {
-			const updateRemaining = () => {
-				if (pausedAt) return
-				setRemainingSeconds(
+		const updateRemaining = () => {
+			if (pausedAt) return
+			setRemainingSeconds(
 				Math.max(
 					0,
 					Math.ceil(
-						(new Date(startedAt).getTime() + (durationSeconds + pausedSeconds) * 1000 - Date.now()) /
+						(new Date(startedAt).getTime() +
+							(durationSeconds + pausedSeconds) * 1000 -
+							Date.now()) /
 							1000,
 					),
 				),
@@ -73,29 +77,34 @@ export function ActiveRoundCard({
 		}
 
 		updateRemaining()
-		const interval = pausedAt ? undefined : window.setInterval(updateRemaining, 1000)
+		const interval = pausedAt
+			? undefined
+			: window.setInterval(updateRemaining, 1000)
 		return () => {
 			if (interval !== undefined) window.clearInterval(interval)
 		}
 	}, [durationSeconds, pausedAt, pausedSeconds, startedAt])
 
-	const handleResolveWord = useCallback(async (result: 'guessed' | 'skipped') => {
-		setIsResolving(true)
-		setError(null)
-		try {
-			const response = await resolveCurrentRoundWord(gameId, result)
-			if (!response.success) {
-				setError(response.error ?? 'Не удалось сохранить результат слова.')
-				return
+	const handleResolveWord = useCallback(
+		async (result: 'guessed' | 'skipped') => {
+			setIsResolving(true)
+			setError(null)
+			try {
+				const response = await resolveCurrentRoundWord(gameId, result)
+				if (!response.success) {
+					setError(response.error ?? 'Не удалось сохранить результат слова.')
+					return
+				}
+				router.refresh()
+			} catch (cause) {
+				console.error('Error resolving round word:', cause)
+				setError('Не удалось сохранить результат слова.')
+			} finally {
+				setIsResolving(false)
 			}
-			router.refresh()
-		} catch (cause) {
-			console.error('Error resolving round word:', cause)
-			setError('Не удалось сохранить результат слова.')
-		} finally {
-			setIsResolving(false)
-		}
-	}, [gameId, router])
+		},
+		[gameId, router],
+	)
 
 	useEffect(() => {
 		if (remainingSeconds !== 0 || expiryRequested.current) return
@@ -138,7 +147,7 @@ export function ActiveRoundCard({
 	}
 
 	return (
-		<Card className='border-primary/40'>
+		<Card className='flex min-h-[calc(100vh-12rem)] flex-1 flex-col border-primary/40'>
 			<CardHeader className='flex flex-row items-center justify-between gap-4'>
 				<CardTitle>Слово для объяснения</CardTitle>
 				<output
@@ -150,24 +159,46 @@ export function ActiveRoundCard({
 				</output>
 			</CardHeader>
 			<CardContent
-				className='touch-none select-none'
+				className='flex flex-1 touch-none select-none flex-col gap-y-2'
 				onTouchStart={(event) => {
 					touchStartY.current = event.touches[0].clientY
 				}}
 				onTouchEnd={handleTouchEnd}
 			>
+				<div className='flex justify-center'>
+					<div className='inline-flex items-center gap-2 rounded-full bg-green-500/10 px-3 py-1.5 text-sm font-medium text-green-700 dark:text-green-400'>
+						<CircleCheck className='size-5 fill-green-500 text-green-500' />
+						<span>Угадано</span>
+						<span className='px-2 py-0.5 text-xs font-semibold text-white tabular-nums'>
+							{guessedCount}
+						</span>
+					</div>
+				</div>
 				{isPaused ? (
-					<div className='py-8 text-center'>
+					<div className='flex flex-1 flex-col items-center justify-center py-8 text-center'>
 						<p className='text-xl font-semibold'>Раунд на паузе</p>
 						<p className='mt-2 text-sm text-muted-foreground'>
 							Продолжите раунд, чтобы показать слово.
 						</p>
 					</div>
 				) : (
-					<p className='py-8 text-center text-4xl font-bold'>{word}</p>
+					<div className='flex flex-1 items-center justify-center py-8 text-center'>
+						<p className='wrap-break-word text-5xl font-bold sm:text-6xl'>
+							{word}
+						</p>
+					</div>
 				)}
+				<div className='flex justify-center'>
+					<div className='inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground'>
+						<Circle className='size-5' />
+						<span>Пропущено</span>
+						<span className='rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground tabular-nums'>
+							{skippedCount}
+						</span>
+					</div>
+				</div>
 				{remainingSeconds > 0 && !isPaused && wordId && (
-					<div className='grid grid-cols-2 gap-3'>
+					<div className='mt-6 grid grid-cols-2 gap-3'>
 						<Button
 							disabled={isResolving}
 							onClick={() => void handleResolveWord('guessed')}
@@ -184,18 +215,10 @@ export function ActiveRoundCard({
 					</div>
 				)}
 				{remainingSeconds > 0 && !wordId && (
-					<p className='mb-4 text-center text-sm text-muted-foreground'>Все слова использованы. Таймер продолжает идти.</p>
+					<p className='mb-4 text-center text-sm text-muted-foreground'>
+						Все слова использованы. Таймер продолжает идти.
+					</p>
 				)}
-				<div className='mt-4 grid grid-cols-2 gap-3 text-sm'>
-					<div className='rounded-md bg-muted px-3 py-2'>
-						<span className='text-muted-foreground'>Угадано</span>
-						<span className='float-right font-semibold tabular-nums'>{guessedCount}</span>
-					</div>
-					<div className='rounded-md bg-muted px-3 py-2'>
-						<span className='text-muted-foreground'>Пропущено</span>
-						<span className='float-right font-semibold tabular-nums'>{skippedCount}</span>
-					</div>
-				</div>
 				{remainingSeconds > 0 && (
 					<Button
 						variant='outline'
@@ -212,7 +235,9 @@ export function ActiveRoundCard({
 				)}
 				{error && <p className='text-sm text-destructive'>{error}</p>}
 				{remainingSeconds === 0 && (
-					<p className='text-center text-sm text-muted-foreground'>Время раунда вышло</p>
+					<p className='text-center text-sm text-muted-foreground'>
+						Время раунда вышло
+					</p>
 				)}
 			</CardContent>
 		</Card>

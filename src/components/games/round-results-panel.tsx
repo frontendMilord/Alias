@@ -74,8 +74,8 @@ export function RoundResultsPanel({
 				</CardHeader>
 				<CardContent className='space-y-3'>
 					<p>
-						Ход команды «{explainingTeam?.name ?? '—'}», объяснял{' '}
-						{explainingPlayerName ?? '—'}.
+						Объяснял {explainingPlayerName ?? '—'} из команды «
+						{explainingTeam?.name ?? '—'}».
 					</p>
 					<p className='text-2xl font-bold'>
 						{pointsEarned > 0 ? '+' : ''}{pointsEarned} очков
