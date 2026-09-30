@@ -38,7 +38,7 @@ src/
       profile/page.tsx        — никнейм, роль, кнопка выхода
       games/
         new/page.tsx           — мастер создания игры (4 шага)
-        [id]/page.tsx           — страница игры: команды, настройки, списки, старт раунда
+        [id]/page.tsx           — серверная страница игры: счёт, команды и настройки
         actions.ts               — createGame (server action)
       lists/
         page.tsx / [id]/page.tsx — списки слов (свои/публичные/расшаренные)
@@ -74,64 +74,133 @@ src/
 
 ## Модель данных (Supabase)
 
-Снимок типов схемы удалённого проекта `public` получен через Supabase CLI
-`gen types --linked` и хранится в `src/types/database.generated.ts`. Это источник
-актуальных таблиц, колонок, связей, RPC и enum для типов. SQL-миграции пока не
-выгружены: `db pull` и `db dump` требуют Docker/Podman в текущей CLI-сборке.
-`supabase/schema.sql` сейчас пустой. RLS, политики, функции и триггеры проверены
-read-only запросом системного каталога связанной базы 2026-09-30; TypeScript-типы
-сами по себе эту часть схемы не описывают.
+Сверено с удалённой схемой `public` связанного проекта read-only запросами CLI
+`db query --linked` 2026-09-30. Сгенерированный снимок таблиц, полей, типов,
+RPC и FK лежит в `src/types/database.generated.ts`; обновить его через
+`npx.cmd supabase gen types typescript --linked --schema public` после изменений
+схемы. `supabase/schema.sql` пустой, миграций в `supabase/migrations/` пока нет.
+`db pull`/`db dump` не выполнились без Docker/Podman, поэтому DDL всей схемы не
+сохранён; каталог БД использовался для проверки CHECK/UNIQUE/FK, RLS, функций
+и триггеров. В снимке нет RLS и триггеров; сверять их повторным запросом каталога.
+SQL hotfixes для уже существующего удалённого проекта хранятся в
+`supabase/patches/`; они не являются migrations и не предназначены для чистого
+`db reset`, пока не будет добавлена базовая migration.
 
-- `profiles` — id, nickname, avatar_url, role, profile_setup_completed, created_at, updated_at
-- `lists` — id, name, description, owner_id, is_system, created_at, updated_at
-- `words` — id, text, difficulty, owner_id, created_at, updated_at
-- `list_words` — id, list_id, word_id, added_by, created_at
-- `list_permissions` — id, list_id, user_id, can_view/can_add_words/can_edit_words/can_delete_words, created_at, updated_at
-- `list_share_links` — id, list_id, token, created_by, права доступа, expires_at, created_at
-- `games` — id, owner_id, status, target_score, round_duration_seconds,
-  subtract_point_for_skip, selected_difficulties, selected_lists,
-  current_round_number, current_team_id, current_explainer_player_id,
-  created_at, finished_at
-- `game_teams` — id, game_id, name, team_order, score, created_at
-- `game_players` — id, team_id, nickname, player_order, created_at
-- `game_difficulties` — id, game_id, difficulty
-- `game_lists` — id, game_id, list_id
-- `game_rounds` — id, game_id, team_id, explainer_player_id, round_number, status,
-  started_at, ended_at, guessed_count, skipped_count, points_earned, last_word_id, created_at
-- `round_words` — id, round_id, word_id, word_text (снимок текста), difficulty,
-  displayed_order, result, guessed_by_team_id, is_last_word_for_all, created_at
-- Enum `game_status`: `active`, `finished`, `cancelled`; `round_status`:
-  `preparation`, `active`, `result`, `finished`; `user_role`: `user`, `admin`;
-  `word_difficulty`: `easy`, `medium`, `hard`, `insane`; `word_result`:
-  `guessed`, `skipped`, `last_word`.
-- RPC: `can_add_list_words`, `can_add_to_list`, `can_delete_list_words`,
-  `can_edit_list_words`, `can_view_list`, `get_list_preview_words`, `is_admin`,
-  `is_list_owner`.
-- **RLS:** включён на всех 13 таблицах `public`; `FORCE ROW LEVEL SECURITY` не
-  включён. Доступ для списков и слов ограничен владельцем, системными списками,
-  администратором и правами из `list_permissions`. `list_words` проверяет права
-  на просмотр/добавление/удаление. Профили доступны на чтение всем
-  аутентифицированным пользователям, изменять их могут владелец профиля и admin.
-  Игры доступны владельцу (и admin на чтение); команды, игроки, раунды и слова
-  раунда ограничены владельцем игры (admin — на чтение). Для `game_lists` и
-  `game_difficulties` обнаружены только политики INSERT владельцем игры.
-  Для `list_share_links` SELECT разрешён владельцу списка или создателю ссылки,
-  INSERT/DELETE — владельцу списка.
-- **Функции и триггеры:** `on_auth_user_created` на `auth.users` вызывает
-  `public.handle_new_user()` (SECURITY DEFINER, фиксированный `search_path=public`)
-  и создаёт профиль из OAuth metadata. `update_updated_at()` обновляет timestamp;
-  триггеры стоят на `profiles`, `lists`, `words`, `list_permissions`. Функции
-  проверки прав списка и `is_admin`/`is_list_owner` — SECURITY DEFINER с
-  `search_path=public`; `get_list_preview_words` возвращает до трёх случайных слов
-  из каждого запрошенного списка.
-- **Нужно исправить:** политика `words_update_by_list_permission` объявлена для
-  `PUBLIC`, разрешает UPDATE при праве редактирования слова через список, но её
-  `WITH CHECK (owner_id = owner_id)` является тавтологией и не сохраняет владельца.
-  Проверка привилегий подтвердила UPDATE на всю таблицу и `owner_id` у ролей
-  `anon` и `authenticated`; RLS-предикат ограничивает фактический доступ, но
-  аутентифицированный редактор расшаренного списка может сменить `owner_id`.
-  Исправить колонковые права или использовать проверяемую RPC/trigger-логику,
-  сохраняющую владельца, и покрыть это тестом.
+### Таблицы и поля
+
+- `profiles`: `id`, `nickname`, `avatar_url`, `role`,
+  `profile_setup_completed`, `created_at`, `updated_at`.
+- `lists`: `id`, `name`, `description`, `owner_id`, `is_system`, `created_at`,
+  `updated_at`.
+- `words`: `id`, `text`, `difficulty`, `owner_id`, `created_at`, `updated_at`.
+- `list_words`: `id`, `list_id`, `word_id`, `added_by`, `created_at`.
+- `list_permissions`: `id`, `list_id`, `user_id`, `can_view`, `can_add_words`,
+  `can_edit_words`, `can_delete_words`, `created_at`, `updated_at`.
+- `list_share_links`: `id`, `list_id`, `token`, `created_by`, `can_view`,
+  `can_add_words`, `can_edit_words`, `can_delete_words`, `expires_at`, `created_at`.
+- `games`: `id`, `owner_id`, `status`, `target_score`, `round_duration_seconds`,
+  `subtract_point_for_skip`, `selected_difficulties`, `selected_lists`,
+  `current_round_number`, `current_team_id`, `current_explainer_player_id`,
+  `created_at`, `finished_at`.
+- `game_teams`: `id`, `game_id`, `name`, `team_order`, `score`, `created_at`.
+- `game_players`: `id`, `team_id`, `nickname`, `player_order`, `created_at`.
+- `game_difficulties`: `id`, `game_id`, `difficulty`.
+- `game_lists`: `id`, `game_id`, `list_id`.
+- `game_rounds`: `id`, `game_id`, `team_id`, `explainer_player_id`,
+  `round_number`, `status`, `started_at`, `ended_at`, `guessed_count`,
+  `skipped_count`, `points_earned`, `last_word_id`, `created_at`.
+- `round_words`: `id`, `round_id`, `word_id`, `word_text`, `difficulty`,
+  `displayed_order`, `result`, `guessed_by_team_id`, `is_last_word_for_all`,
+  `created_at`.
+- У таблиц есть UUID `id` primary key. Nullable поля и точные типы Row/Insert/Update
+  см. в сгенерированном `src/types/database.generated.ts`. Views и composite types
+  в `public` отсутствуют.
+
+### Enum и ограничения
+
+- `user_role`: `user`, `admin`.
+- `word_difficulty`: `easy`, `medium`, `hard`, `insane`.
+- `game_status`: `active`, `finished`, `cancelled`.
+- `round_status`: `preparation`, `active`, `result`, `finished`.
+- `word_result`: `guessed`, `skipped`, `last_word`.
+- CHECK: `profiles.nickname` 2–30 символов; `lists.name` 1–100; `words.text`
+  после `trim` 1–200; `games.target_score > 0`, `round_duration_seconds` 10–600,
+  `current_round_number > 0`, массивы `selected_difficulties` и `selected_lists`
+  не пусты; `game_teams.name` после `trim` 1–50 и `score >= 0`;
+  `game_players.nickname` после `trim` 1–50; `game_rounds.guessed_count` и
+  `skipped_count >= 0`.
+- UNIQUE: `list_words(list_id, word_id)`, `list_permissions(list_id, user_id)`,
+  `list_share_links(token)`, `game_lists(game_id, list_id)`,
+  `game_difficulties(game_id, difficulty)`, `game_teams(game_id, team_order)`,
+  `game_players(team_id, player_order)`, `game_rounds(game_id, round_number)`,
+  `round_words(round_id, displayed_order)`.
+- Внешние ключи (если не указано иное — `ON DELETE CASCADE`): `profiles.id` →
+  `auth.users.id`; `lists.owner_id`, `games.owner_id`, `words.owner_id` →
+  `profiles.id`; `list_words.list_id` → `lists.id`, `word_id` → `words.id`,
+  `added_by` → `profiles.id`; `list_permissions.list_id` → `lists.id`,
+  `user_id` → `profiles.id`; `list_share_links.list_id` → `lists.id`,
+  `created_by` → `profiles.id`; `game_teams.game_id` → `games.id`;
+  `game_players.team_id` → `game_teams.id`; `game_rounds.game_id` → `games.id`,
+  `team_id` → `game_teams.id`, `explainer_player_id` → `game_players.id`;
+  `round_words.round_id` → `game_rounds.id`. `games.current_team_id` и
+  `current_explainer_player_id` ссылаются на `game_teams.id`/`game_players.id`
+  с `ON DELETE SET NULL`; `game_rounds.last_word_id` → `round_words.id`
+  с `SET NULL`; `round_words.guessed_by_team_id` → `game_teams.id` с `SET NULL`;
+  `round_words.word_id` → `words.id` с `ON DELETE RESTRICT`; `game_lists.list_id` →
+  `lists.id` с `RESTRICT`.
+- **Пробелы целостности:** у `game_lists.game_id` и `game_difficulties.game_id`
+  нет FK к `games`; также нет ограничения, что выбранные `games.current_team_id`,
+  `current_explainer_player_id` и `game_rounds.explainer_player_id` относятся
+  к той же игре/команде.
+
+### RPC, функции и триггеры
+
+- RPC `is_admin()` проверяет `profiles.role`; `is_list_owner(p_list_id)` проверяет
+  владельца списка. `can_view_list`, `can_add_to_list`, `can_add_list_words`,
+  `can_edit_list_words`, `can_delete_list_words` дают владельцу доступ либо
+  проверяют соответствующий флаг `list_permissions`. `can_add_list_words` и
+  `can_add_to_list` сейчас дублируют логику.
+- `get_list_preview_words(p_list_ids)` возвращает до трёх случайных слов на список.
+- `on_auth_user_created` — AFTER INSERT на `auth.users`; вызывает
+  `public.handle_new_user()` и создаёт `profiles` из OAuth metadata. Функция
+  SECURITY DEFINER с `search_path=public`.
+- `update_updated_at()` задаёт `new.updated_at = now()`; BEFORE UPDATE триггеры
+  есть на `profiles`, `lists`, `words`, `list_permissions`.
+- RPC-помощники проверки доступа и `is_admin`/`is_list_owner` используют
+  SECURITY DEFINER и фиксированный `search_path=public`; `get_list_preview_words`
+  — не SECURITY DEFINER.
+
+### RLS
+
+RLS включён на всех 13 таблицах `public`; `FORCE ROW LEVEL SECURITY` нигде не
+включён. Политики сгруппированы по фактическому доступу:
+
+- `profiles`: SELECT всем authenticated; UPDATE своего профиля или admin.
+- `lists`: SELECT владелец/system/can_view/admin; INSERT владелец, только
+  `is_system=false`; UPDATE/DELETE владелец несистемного списка или admin.
+- `words`: SELECT владелец/admin/через список с правом просмотра; INSERT/DELETE
+  владелец; UPDATE разрешён редактору списка через `can_edit_list_words`.
+- `list_words`: SELECT can_view/admin; INSERT can_add и `added_by=auth.uid()`;
+  DELETE can_delete/admin.
+- `list_permissions`: SELECT владелец списка/получатель/admin; INSERT/UPDATE/DELETE
+  владелец списка.
+- `list_share_links`: SELECT владелец списка или создатель ссылки; INSERT/DELETE
+  владелец списка.
+- `games`: SELECT владелец/admin; INSERT/UPDATE/DELETE владелец.
+- `game_teams`, `game_players`: SELECT владелец игры/admin; INSERT/UPDATE/DELETE
+  владелец игры.
+- `game_rounds`, `round_words`: SELECT владелец игры/admin; INSERT/UPDATE владелец;
+  DELETE-политик нет.
+- `game_lists`, `game_difficulties`: есть только INSERT-политики владельца игры;
+  SELECT/UPDATE/DELETE-политик нет.
+- **Исправлено 2026-09-30:** для `words_update_by_list_permission` оставлена роль
+  `authenticated`, а `WITH CHECK` повторяет проверку права редактирования списка.
+  Table-level и column-level UPDATE отозваны у `anon` и `authenticated`, затем
+  `authenticated` получил UPDATE только для `text`, `difficulty`, `updated_at`.
+  Проверка удалённой БД подтвердила, что `owner_id` недоступен для UPDATE обеим
+  ролям, нужные приложению колонки обновляемы, и политика применена. SQL находится
+  в `supabase/patches/20260930_words_update_authorization.sql`; повторно применять
+  его допустимо, однако это не migration для чистой базы.
 
 ## Что уже реализовано
 
@@ -147,9 +216,10 @@ read-only запросом системного каталога связанн�
    `game_players`, `game_difficulties`, `game_lists`).
 5. **Главная страница**: показывает активную игру владельца, позволяет начать
    новую (с подтверждением отмены текущей — `cancelGame`).
-6. **Страница игры** (`games/[id]/page.tsx`) — получение игры через `getGame(id)`
-   (команды со счётом, игроки, настройки, названия выбранных списков) и отображение
-   состояния. Механика запуска/проведения раунда пока не реализована.
+6. **Страница игры** (`games/[id]/page.tsx`): защищена `requireUser`, загружает игру
+   через `getGame(id)` и отображает статус, счёт команд с прогрессом к цели,
+   игроков, правила, сложность и выбранные списки. Механика запуска/проведения
+   раунда ещё не реализована.
 
 ## Что дальше (по плану)
 
@@ -161,8 +231,6 @@ read-only запросом системного каталога связанн�
 - Разобраться с легаси-папкой `src/app/(app)/game/` (singular): сейчас там
   находится `cancelGame`, используемый главной страницей. При переносе обновить
   импорты; решить, нужна ли заглушка маршрута `/game`.
-- Сверить описание Supabase-схемы с фактической схемой проекта и зафиксировать
-  проверенные таблицы, поля, enum/check-значения, RPC, RLS и внешние ключи.
 
 ## Конвенции кода
 
