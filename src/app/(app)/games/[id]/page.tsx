@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Check, Clock3, Minus } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 import { ActiveRoundCard } from '@/components/games/active-round-card'
 import { BeginRoundButton } from '@/components/games/begin-round-button'
 import { CloseGameButton } from '@/components/games/close-game-button'
+import { FinishedGamePanel } from '@/components/games/finished-game-panel'
 import { NextRoundButton } from '@/components/games/next-round-button'
 import { RoundResultsPanel } from '@/components/games/round-results-panel'
 import { SharedWordPanel } from '@/components/games/shared-word-panel'
@@ -96,7 +97,9 @@ export default async function GamePage({ params }: GamePageProps) {
 						<ArrowLeft className='size-4' /> К играм
 					</Link>
 					<h1 className='text-2xl font-semibold'>
-						Игра · Раунд {game.currentRoundNumber}
+						{game.status === 'finished'
+							? 'Итоги игры'
+							: `Игра · Раунд ${game.currentRoundNumber}`}
 					</h1>
 					<p className='mt-1 text-sm text-muted-foreground'>
 						{statusLabels[game.status]}
@@ -248,7 +251,8 @@ export default async function GamePage({ params }: GamePageProps) {
 					/>
 				)}
 
-			{(round?.status === 'result' || round?.status === 'finished') && (
+			{game.status === 'active' &&
+				(round?.status === 'result' || round?.status === 'finished') && (
 				<>
 					<TeamsCard
 						teams={game.teams}
@@ -266,22 +270,15 @@ export default async function GamePage({ params }: GamePageProps) {
 						lastWordTeamId={lastWordTeamId}
 						canAdvance={game.status === 'active' && round.status === 'result'}
 					/>
-					{game.status === 'finished' && (
-						<p className='text-center font-semibold'>
-							Игра завершена — достигнута цель по очкам.
-						</p>
-					)}
 				</>
 			)}
 
-			{game.status === 'finished' && !round && (
-				<>
-					<p className='text-center font-semibold'>Игра завершена.</p>
-					<TeamsCard
-						teams={game.teams}
-						targetScore={game.targetScore}
-					/>
-				</>
+			{game.status === 'finished' && (
+				<FinishedGamePanel
+					teams={game.teams}
+					summary={game.finishedSummary}
+					targetScore={game.targetScore}
+				/>
 			)}
 
 			{game.status === 'cancelled' && <p>Эта игра отменена.</p>}

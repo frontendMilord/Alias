@@ -178,6 +178,50 @@ export async function getGame(id: string): Promise<Game | null> {
 				})),
 		}))
 
+	let finishedSummary: Game['finishedSummary'] = null
+	if (data.status === 'finished') {
+		const { data: roundsData, error: roundsError } = await supabase
+			.from('game_rounds')
+			.select(
+				`
+				round_number,
+				team_id,
+				points_earned,
+				guessed_count,
+				skipped_count
+			`,
+			)
+			.eq('game_id', id)
+			.order('round_number', { ascending: true })
+
+		if (roundsError) {
+			console.error('Error fetching finished game rounds:', {
+				code: roundsError.code,
+				message: roundsError.message,
+				details: roundsError.details,
+				hint: roundsError.hint,
+			})
+		} else {
+			const rounds = roundsData ?? []
+			const createdAt = new Date(data.created_at).getTime()
+			const finishedAt = data.finished_at
+				? new Date(data.finished_at).getTime()
+				: createdAt
+			finishedSummary = {
+				durationSeconds: Math.max(0, Math.round((finishedAt - createdAt) / 1000)),
+				rounds: rounds.map((round) => ({
+					roundNumber: round.round_number,
+					teamId: round.team_id,
+					pointsEarned: round.points_earned,
+					guessedCount: round.guessed_count,
+					skippedCount: round.skipped_count,
+				})),
+				guessedCount: rounds.reduce((total, round) => total + round.guessed_count, 0),
+				skippedCount: rounds.reduce((total, round) => total + round.skipped_count, 0),
+			}
+		}
+	}
+
 	return {
 		id: data.id,
 		ownerId: data.owner_id,
@@ -194,6 +238,7 @@ export async function getGame(id: string): Promise<Game | null> {
 		createdAt: data.created_at,
 		finishedAt: data.finished_at,
 		teams,
+		finishedSummary,
 		activeRound: roundData
 			? {
 					id: roundData.id,

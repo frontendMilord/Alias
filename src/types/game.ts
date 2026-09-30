@@ -43,6 +43,21 @@ export interface GameRoundWord {
 	isLastWordForAll: boolean
 }
 
+export interface FinishedGameRoundSummary {
+	roundNumber: number
+	teamId: string
+	pointsEarned: number
+	guessedCount: number
+	skippedCount: number
+}
+
+export interface FinishedGameSummary {
+	durationSeconds: number
+	rounds: FinishedGameRoundSummary[]
+	guessedCount: number
+	skippedCount: number
+}
+
 export interface Game {
 	id: string
 	ownerId: string
@@ -60,6 +75,7 @@ export interface Game {
 	finishedAt: string | null
 	teams: GameTeam[]
 	activeRound: ActiveGameRound | null
+	finishedSummary: FinishedGameSummary | null
 }
 
 export interface GameTeamDraft {
