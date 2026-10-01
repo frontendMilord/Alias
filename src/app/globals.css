@@ -240,13 +240,26 @@
 	}
 }
 
+@keyframes button-pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.85;
+		transform: scale(1.02);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	[class*='animate-[word-'],
 	[class*='animate-[timer-'],
 	[class*='animate-[pause-'],
 	[class*='animate-[score-'],
 	[class*='animate-[shared-word-'],
-	[class*='animate-[screen-'] {
+	[class*='animate-[screen-'],
+	[class*='animate-[button-'] {
 		animation: none !important;
 		transition: none !important;
 	}

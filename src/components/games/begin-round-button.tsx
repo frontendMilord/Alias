@@ -30,7 +30,7 @@ export function BeginRoundButton({ gameId }: { gameId: string }) {
 
 	return (
 		<div className='space-y-2'>
-			<Button className='w-full' disabled={isStarting} onClick={handleStart}>
+			<Button className='w-full animate-[button-pulse_2s_ease-in-out_infinite]' disabled={isStarting} onClick={handleStart}>
 				{isStarting ? 'Запускаем таймер...' : 'Начать'}
 			</Button>
 			{error && <p className='text-sm text-destructive'>{error}</p>}
