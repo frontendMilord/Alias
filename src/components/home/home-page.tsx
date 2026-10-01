@@ -81,7 +81,7 @@ export function HomePage({ nickname, activeGame }: HomePageProps) {
 		<>
 			<main className='mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-[640px] flex-col items-center justify-center px-4 py-6'>
 				<div className='mb-8 flex flex-col items-center text-center'>
-					<Image src='/logo-transparent.svg' alt='Alias' width={220} height={72} priority className='mb-8 h-auto w-52' />
+					<Image src='/logo-transparent.svg' alt='Alias' width={220} height={72} priority loading='eager' className='mb-8 w-52' style={{ height: 'auto' }} />
 					<h1 className='text-2xl font-semibold'>Привет, {nickname}! 👋</h1>
 
 					<p className='mt-2 text-sm text-muted-foreground'>Готовы сыграть?</p>

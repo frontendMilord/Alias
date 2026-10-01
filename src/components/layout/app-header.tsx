@@ -12,7 +12,7 @@ export function AppHeader() {
 		<header className='sticky top-0 z-10 -mx-4 border-b bg-background/95 px-4 backdrop-blur'>
 			<div className='flex h-14 items-center justify-between gap-4'>
 				<Link href='/' className='flex items-center gap-2 font-semibold'>
-					<Image src='/logo-transparent.svg' alt='Alias' width={100} height={32} className='h-8 w-auto' />
+					<Image src='/logo-transparent.svg' alt='Alias' width={100} height={32} loading='eager' className='h-8' style={{ width: 'auto' }} />
 				</Link>
 				<nav aria-label='Основная навигация' className='flex items-center gap-1'>
 					{links.map(({ href, label, icon: Icon }) => (

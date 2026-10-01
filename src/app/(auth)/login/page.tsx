@@ -27,7 +27,9 @@ export default function LoginPage() {
 							alt='Alias'
 							width={210}
 							height={70}
-							className='h-auto w-52'
+							loading='eager'
+							className='w-52'
+							style={{ height: 'auto' }}
 						/>
 					</CardTitle>
 					<p className='text-center text-base text-muted-foreground'>
