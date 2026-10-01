@@ -1,6 +1,7 @@
 'use client'
 
 import { Plus, Trash2, X } from 'lucide-react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +23,7 @@ export function TeamEditor({
 	onChange,
 	onDelete,
 }: TeamEditorProps) {
+	const [focusLastPlayer, setFocusLastPlayer] = useState(false)
 	const updateName = (name: string) => {
 		onChange({
 			...team,
@@ -40,6 +42,7 @@ export function TeamEditor({
 	}
 
 	const addPlayer = () => {
+		setFocusLastPlayer(true)
 		onChange({
 			...team,
 			players: [...team.players, ''],
@@ -114,6 +117,7 @@ export function TeamEditor({
 									<div className='flex gap-2'>
 										<Input
 											value={player}
+											autoFocus={focusLastPlayer && index === team.players.length - 1}
 											onChange={(event) =>
 												updatePlayer(index, event.target.value)
 											}

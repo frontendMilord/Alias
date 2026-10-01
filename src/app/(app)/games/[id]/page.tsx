@@ -201,10 +201,11 @@ export default async function GamePage({ params }: GamePageProps) {
 								Таймер: {minutes > 0 ? `${minutes} мин ` : ''}
 								{seconds} сек. Начнётся после нажатия кнопки.
 							</p>
-							<p>
-								Ход команды «{currentTeam?.name ?? '—'}», объясняет{' '}
-								{currentPlayer?.nickname ?? '—'}.
-							</p>
+							<div className='rounded-xl border border-primary/30 bg-primary/10 px-4 py-5 text-center'>
+								<p className='text-xs font-semibold uppercase tracking-wider text-primary'>Ход команды</p>
+								<p className='mt-1 text-2xl font-bold'>«{currentTeam?.name ?? '—'}»</p>
+								<p className='mt-2 text-base text-muted-foreground'>объясняет <span className='font-semibold text-foreground'>{currentPlayer?.nickname ?? '—'}</span></p>
+							</div>
 						</CardContent>
 					</Card>
 					<BeginRoundButton gameId={game.id} />

@@ -202,7 +202,15 @@ export function ActiveRoundCard({
 					</div>
 				</div>
 				{isPaused ? (
-					<div className='flex flex-1 flex-col items-center justify-center py-8 text-center'>
+					<div
+						className='flex flex-1 cursor-pointer flex-col items-center justify-center rounded-xl py-8 text-center hover:bg-muted/40'
+						onClick={() => void handlePause()}
+						role='button'
+						tabIndex={0}
+						onKeyDown={(event) => {
+							if (event.key === 'Enter' || event.key === ' ') void handlePause()
+						}}
+					>
 						<p className='text-xl font-semibold'>Раунд на паузе</p>
 						<p className='mt-2 text-sm text-muted-foreground'>
 							Продолжите раунд, чтобы показать слово.
