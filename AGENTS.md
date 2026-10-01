@@ -39,37 +39,9 @@ src/
       games/
         new/page.tsx           — мастер создания игры (4 шага)
         [id]/page.tsx           — серверная страница игры: счёт, команды и настройки
-        actions.ts               — createGame и startGameRound (server actions)
+        actions.ts               — createGame, startGameRound и cancelGame (server actions)
       lists/
         page.tsx / [id]/page.tsx — списки слов (свои/публичные/расшаренные)
-      game/                    — ЛЕГАСИ, отдельно от games/. Содержит `cancelGame`
-                                  (используется главной страницей) и пустую
-                                  заглушку `page.tsx`. Основная логика игр — в games/.
-    admin/page.tsx            — заглушка для роли admin
-    auth/callback/route.ts    — обмен OAuth code → сессия, редирект на /setup или /
-    layout.tsx                — root layout, шрифты Geist, тема dark
-  components/
-    ui/                       — shadcn-примитивы (button, card, dialog, input, select, ...)
-    auth/logout-button.tsx
-    home/home-page.tsx        — клиентский компонент главной страницы
-    layout/app-container.tsx  — общий контейнер приватной зоны
-    games/
-      new-game-page.tsx        — клиентский компонент мастера создания игры
-      team-editor.tsx
-    lists/                     — карточки списков, диалоги создания/шаринга/добавления слов
-  lib/
-    server.ts / client.ts     — Supabase-клиенты (server components/actions vs browser)
-    middleware.ts             — session refresh + редирект неавторизованных
-    consts.ts                 — словари подписей (сложности, шаги мастера, типы списков)
-    utils.ts                  — cn(), pluralizeWordsCount(), getListType()
-    auth/                     — getCurrentProfile, requireUser, requireAdmin
-    games/
-      game.ts                  — getGame(id): полная игра (команды/игроки/списки)
-      get-active-game.ts        — последняя активная игра текущего owner'а
-    lists/                    — getLists, getList, getListWords, getAvailableLists,
-                                 getListPermissions
-  types/                      — Game, GameTeamDraft/CreateGameInput, List, Word, Profile
-  proxy.ts
 ```
 
 ## Модель данных (Supabase)
@@ -264,11 +236,6 @@ RLS включён на всех 13 таблицах `public`; `FORCE ROW LEVEL 
   слова, общего слова после окончания таймера и завершения игры.
 - Обновить `README.md`: описать реализованные возможности веб-версии, которых нет
   в оригинальной игре.
-- Добавить реалтайм-синхронизацию состояния игры между участниками (Supabase
-  Realtime подключений пока в коде нет).
-- Разобраться с легаси-папкой `src/app/(app)/game/` (singular): сейчас там
-  находится `cancelGame`, используемый главной страницей. При переносе обновить
-  импорты; решить, нужна ли заглушка маршрута `/game`.
 - Проверить нужна ли валидация форм
 - Подумать нужно ли изменение никнейма и как это затронет все остальное
 - Подумать где нужны анимации

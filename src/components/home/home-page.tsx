@@ -16,7 +16,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { cancelGame } from '@/app/(app)/game/actions'
+import { cancelGame } from '@/app/(app)/games/actions'
 
 interface ActiveGame {
 	id: string
