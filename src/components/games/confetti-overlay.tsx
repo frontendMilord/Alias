@@ -18,6 +18,7 @@ const CONFETTI_COUNT = 160
 interface ConfettiPiece {
 	id: number
 	left: number
+	startTop: number
 	delay: number
 	duration: number
 	color: string
@@ -31,7 +32,8 @@ function createPieces(): ConfettiPiece[] {
 		return {
 			id: index,
 			left: Math.random() * 100,
-			delay: Math.random() * 4,
+			startTop: -5 - Math.random() * 30,
+			delay: Math.random() * 6,
 			duration,
 			color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
 			size: 6 + Math.random() * 6,
@@ -54,6 +56,7 @@ export function ConfettiOverlay() {
 					className='absolute animate-[confetti-fall_linear_forwards] rounded-[1px]'
 					style={{
 						left: `${piece.left}%`,
+						['--confetti-start-top' as string]: `${piece.startTop}vh`,
 						width:
 							piece.shape === 'rect'
 								? `${piece.size}px`

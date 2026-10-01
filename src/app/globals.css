@@ -298,7 +298,7 @@
 
 @keyframes confetti-fall {
 	0% {
-		top: -2vh;
+		top: var(--confetti-start-top, -2vh);
 		opacity: 1;
 		transform: translateX(0) rotate(0deg);
 	}
