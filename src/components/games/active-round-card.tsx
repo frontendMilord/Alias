@@ -47,6 +47,14 @@ export function ActiveRoundCard({
 	const [isUpdatingPause, setIsUpdatingPause] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const [isResolving, setIsResolving] = useState(false)
+	const [wordAnimation, setWordAnimation] = useState<
+		'enter' | 'exit-guessed' | 'exit-skipped' | null
+	>('enter')
+	const [previousWord, setPreviousWord] = useState(word)
+	if (word !== previousWord) {
+		setPreviousWord(word)
+		setWordAnimation('enter')
+	}
 	const expiryRequested = useRef(false)
 	const pauseOnLeaveRequested = useRef(false)
 	const [remainingSeconds, setRemainingSeconds] = useState(() =>
@@ -108,23 +116,28 @@ export function ActiveRoundCard({
 
 	const handleResolveWord = useCallback(
 		async (result: 'guessed' | 'skipped') => {
-			setIsResolving(true)
+			if (wordAnimation?.startsWith('exit')) return
 			setError(null)
+			setWordAnimation(result === 'guessed' ? 'exit-guessed' : 'exit-skipped')
+			await new Promise((resolve) => setTimeout(resolve, 220))
+			setIsResolving(true)
 			try {
 				const response = await resolveCurrentRoundWord(gameId, result)
 				if (!response.success) {
+					setWordAnimation('enter')
 					setError(response.error ?? 'Не удалось сохранить результат слова.')
 					return
 				}
 				router.refresh()
 			} catch (cause) {
 				console.error('Error resolving round word:', cause)
+				setWordAnimation('enter')
 				setError('Не удалось сохранить результат слова.')
 			} finally {
 				setIsResolving(false)
 			}
 		},
-		[gameId, router],
+		[gameId, router, wordAnimation],
 	)
 
 	useEffect(() => {
@@ -218,7 +231,16 @@ export function ActiveRoundCard({
 					</div>
 				) : (
 					<div className='flex flex-1 items-center justify-center py-8 text-center'>
-						<p className='max-w-full break-all text-center text-5xl font-bold sm:text-6xl'>
+						<p
+							key={word}
+							className={
+								wordAnimation === 'exit-guessed'
+									? 'max-w-full animate-[word-exit-up_220ms_ease-in-out_forwards] break-all text-center text-5xl font-bold text-green-600 transition-colors duration-150 sm:text-6xl dark:text-green-400'
+									: wordAnimation === 'exit-skipped'
+										? 'max-w-full animate-[word-exit-down_220ms_ease-in-out_forwards] break-all text-center text-5xl font-bold text-red-600 transition-colors duration-150 sm:text-6xl dark:text-red-400'
+										: 'max-w-full animate-[word-enter_220ms_ease-out] break-all text-center text-5xl font-bold sm:text-6xl'
+							}
+						>
 							{word}
 						</p>
 					</div>

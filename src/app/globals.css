@@ -117,6 +117,47 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+
+@keyframes word-enter {
+	from {
+		opacity: 0;
+		transform: translateY(0.5rem) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes word-exit-up {
+	from {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-4rem) scale(0.8);
+	}
+}
+
+@keyframes word-exit-down {
+	from {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: translateY(4rem) scale(0.8);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[class*='animate-[word-'] {
+		animation: none !important;
+		transition: none !important;
+	}
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
