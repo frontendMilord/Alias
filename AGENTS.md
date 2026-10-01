@@ -238,7 +238,7 @@ RLS включён на всех 13 таблицах `public`; `FORCE ROW LEVEL 
 2. ~~**Таймер**~~ ✅ Реализовано в `active-round-card.tsx` + `globals.css`: жёлтый в последние 10 с, красный + `timer-pulse` (1 с, scale 1.08) на финальных 5; цвет только на тексте таймера; `prefers-reduced-motion` отключает.
 3. ~~**Пауза-оверлей**~~ ✅ Реализовано в `active-round-card.tsx` + `globals.css`: `pause-enter` (220 мс, blur 6px→0 + fade + scale) при входе в паузу; слово не рендерится во время паузы; `prefers-reduced-motion` отключает.
 4. ~~**Счёт на экране результатов**~~ ✅ Реализовано в `round-results-panel.tsx` + `globals.css`: `score-pop` (220 мс, scale 1→1.12→1) на числе + чип `+N/−N` в карточке; плюс фиксированный плавающий тост у низа экрана (`score-toast`, 2.5 с, fade-in/out), видимый даже при прокрутке длинного списка слов; отслеживание дельты через previousPoints; `prefers-reduced-motion` отключает.
-5. **Общее слово** — торжественный flip/scale-pop, это драматичный момент игры.
+5. ~~**Общее слово**~~ ✅ Реализовано в `shared-word-panel.tsx` + `globals.css`: `shared-word-reveal` (400 мс, rotateX 90°→−8°→0 + scale 0.8→1.05→1) — торжественный 3D-flip; `prefers-reduced-motion` отключает.
 6. **Переходы экранов** preparation → active → result — лёгкий crossfade/slide, чтобы смена состояния не выглядела резкой.
 
 #### Средний приоритет

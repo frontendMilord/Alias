@@ -65,7 +65,7 @@ export function SharedWordPanel({
 					<CardTitle>Общее слово</CardTitle>
 				</CardHeader>
 				<CardContent className='space-y-4'>
-					<p className='py-5 text-center text-4xl font-bold'>{word}</p>
+					<p className='py-5 text-center text-4xl font-bold animate-[shared-word-reveal_400ms_ease-out]'>{word}</p>
 					<p className='text-center text-sm text-muted-foreground'>
 						{allowClose
 							? currentTeam
