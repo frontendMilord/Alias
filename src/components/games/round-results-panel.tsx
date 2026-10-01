@@ -93,13 +93,13 @@ export function RoundResultsPanel({
 							key={pointsEarned}
 							className='text-2xl font-bold animate-[score-pop_220ms_ease-out]'
 						>
-							{pointsEarned > 0 ? '+' : ''}{pointsEarned} очков
+							{pointsEarned > 0 ? '+' : ''}
+							{pointsEarned} очков
 						</p>
 						{pointsDelta !== null && pointsDelta !== 0 && (
-							<span
-								className='rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-semibold animate-[score-chip_180ms_ease-out] text-primary tabular-nums'
-							>
-								{pointsDelta > 0 ? '+' : '−'}{Math.abs(pointsDelta)}
+							<span className='rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-semibold animate-[score-chip_180ms_ease-out] text-primary tabular-nums'>
+								{pointsDelta > 0 ? '+' : '−'}
+								{Math.abs(pointsDelta)}
 							</span>
 						)}
 					</div>
@@ -119,15 +119,24 @@ export function RoundResultsPanel({
 					{usedWords.map((word) => {
 						const guessed = word.result === 'guessed'
 						return (
-							<div key={word.id} className='flex items-center justify-between gap-3 rounded-md border p-3'>
+							<div
+								key={word.id}
+								className='flex items-center justify-between gap-3 rounded-md border p-3'
+							>
 								<p className='min-w-0 truncate font-medium'>{word.wordText}</p>
 								<Button
 									variant='ghost'
 									size='icon'
 									disabled={updatingWordId !== null}
 									onClick={() => void changeResult(word)}
-									aria-label={guessed ? 'Отметить как пропуск' : 'Отметить как угаданное'}
-									title={guessed ? 'Угадано: нажмите, чтобы отметить пропуск' : 'Пропуск: нажмите, чтобы отметить угаданным'}
+									aria-label={
+										guessed ? 'Отметить как пропуск' : 'Отметить как угаданное'
+									}
+									title={
+										guessed
+											? 'Угадано: нажмите, чтобы отметить пропуск'
+											: 'Пропуск: нажмите, чтобы отметить угаданным'
+									}
 								>
 									{guessed ? (
 										<CircleCheck className='size-6 fill-green-500 text-green-500' />
@@ -157,11 +166,15 @@ export function RoundResultsPanel({
 			{pointsDelta !== null && pointsDelta !== 0 && (
 				<div
 					aria-hidden='true'
-					className='pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center'
+					className='pointer-events-none fixed inset-x-0 top-20 z-50 flex justify-center'
 				>
 					<div className='flex items-center gap-2 rounded-full border bg-background/95 px-4 py-2 shadow-lg backdrop-blur animate-[score-toast_2500ms_ease-out_forwards]'>
-						<span key={pointsEarned} className='text-lg font-bold tabular-nums animate-[score-pop_220ms_ease-out]'>
-							{pointsEarned > 0 ? '+' : ''}{pointsEarned} очков
+						<span
+							key={pointsEarned}
+							className='text-lg font-bold tabular-nums animate-[score-pop_220ms_ease-out]'
+						>
+							{pointsEarned > 0 ? '+' : ''}
+							{pointsEarned} очков
 						</span>
 						<span
 							className={
@@ -170,7 +183,8 @@ export function RoundResultsPanel({
 									: 'rounded-full bg-red-500/15 px-2 py-0.5 text-sm font-semibold text-red-700 tabular-nums dark:text-red-400'
 							}
 						>
-							{pointsDelta > 0 ? '+' : '−'}{Math.abs(pointsDelta)}
+							{pointsDelta > 0 ? '+' : '−'}
+							{Math.abs(pointsDelta)}
 						</span>
 					</div>
 				</div>
