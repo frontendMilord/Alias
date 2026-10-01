@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Circle, CircleCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -38,6 +38,17 @@ export function RoundResultsPanel({
 	const router = useRouter()
 	const [updatingWordId, setUpdatingWordId] = useState<string | null>(null)
 	const [error, setError] = useState<string | null>(null)
+	const [pointsDelta, setPointsDelta] = useState<number | null>(null)
+	const [previousPoints, setPreviousPoints] = useState(pointsEarned)
+	if (pointsEarned !== previousPoints) {
+		setPreviousPoints(pointsEarned)
+		setPointsDelta(pointsEarned - previousPoints)
+	}
+	useEffect(() => {
+		if (pointsDelta === null) return
+		const timeout = window.setTimeout(() => setPointsDelta(null), 2500)
+		return () => window.clearTimeout(timeout)
+	}, [pointsDelta])
 	const usedWords = words.filter(
 		(word) => word.result !== null && word.id !== lastWordId,
 	)
@@ -77,9 +88,21 @@ export function RoundResultsPanel({
 						Объяснял {explainingPlayerName ?? '—'} из команды «
 						{explainingTeam?.name ?? '—'}».
 					</p>
-					<p className='text-2xl font-bold'>
-						{pointsEarned > 0 ? '+' : ''}{pointsEarned} очков
-					</p>
+					<div className='flex items-center gap-3'>
+						<p
+							key={pointsEarned}
+							className='text-2xl font-bold animate-[score-pop_220ms_ease-out]'
+						>
+							{pointsEarned > 0 ? '+' : ''}{pointsEarned} очков
+						</p>
+						{pointsDelta !== null && pointsDelta !== 0 && (
+							<span
+								className='rounded-full bg-primary/10 px-2.5 py-0.5 text-sm font-semibold animate-[score-chip_180ms_ease-out] text-primary tabular-nums'
+							>
+								{pointsDelta > 0 ? '+' : '−'}{Math.abs(pointsDelta)}
+							</span>
+						)}
+					</div>
 				</CardContent>
 			</Card>
 
@@ -130,6 +153,28 @@ export function RoundResultsPanel({
 			)}
 
 			{canAdvance && <NextRoundButton gameId={gameId} />}
+
+			{pointsDelta !== null && pointsDelta !== 0 && (
+				<div
+					aria-hidden='true'
+					className='pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center'
+				>
+					<div className='flex items-center gap-2 rounded-full border bg-background/95 px-4 py-2 shadow-lg backdrop-blur animate-[score-toast_2500ms_ease-out_forwards]'>
+						<span key={pointsEarned} className='text-lg font-bold tabular-nums animate-[score-pop_220ms_ease-out]'>
+							{pointsEarned > 0 ? '+' : ''}{pointsEarned} очков
+						</span>
+						<span
+							className={
+								pointsDelta > 0
+									? 'rounded-full bg-green-500/15 px-2 py-0.5 text-sm font-semibold text-green-700 tabular-nums dark:text-green-400'
+									: 'rounded-full bg-red-500/15 px-2 py-0.5 text-sm font-semibold text-red-700 tabular-nums dark:text-red-400'
+							}
+						>
+							{pointsDelta > 0 ? '+' : '−'}{Math.abs(pointsDelta)}
+						</span>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }
