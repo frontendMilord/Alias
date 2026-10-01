@@ -27,11 +27,11 @@ interface ConfettiPiece {
 
 function createPieces(): ConfettiPiece[] {
 	return Array.from({ length: CONFETTI_COUNT }, (_, index) => {
-		const duration = 2.6 + Math.random() * 2.4
+		const duration = 4 + Math.random() * 3.5
 		return {
 			id: index,
 			left: Math.random() * 100,
-			delay: Math.random() * 0.8,
+			delay: Math.random() * 2,
 			duration,
 			color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
 			size: 6 + Math.random() * 6,
