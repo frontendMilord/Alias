@@ -227,7 +227,7 @@ export function ActiveRoundCard({
 				</div>
 				{isPaused ? (
 					<div
-						className='flex flex-1 cursor-pointer flex-col items-center justify-center rounded-xl py-8 text-center hover:bg-muted/40'
+						className='flex flex-1 cursor-pointer animate-[pause-enter_220ms_ease-out] flex-col items-center justify-center rounded-xl py-8 text-center hover:bg-muted/40'
 						onClick={() => void handlePause()}
 						role='button'
 						tabIndex={0}
