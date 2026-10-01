@@ -250,7 +250,7 @@ RLS включён на всех 13 таблицах `public`; `FORCE ROW LEVEL 
 
 9. ~~**Главная**~~ ✅ Реализовано в `home-page.tsx` + `globals.css`: `card-enter` (350 мс, fade + slide-up 1rem) на блоке кнопок; играет однократно при монтировании; `prefers-reduced-motion` отключает.
 10. ~~**Мастер создания игры**~~ ✅ Реализовано в `new-game-page.tsx` + `globals.css`: direction-aware slide (вперёд — справа налево `step-forward`, назад — слева направо `step-back`, 300 мс) через `stepDirection`-state + `key='wizard-step-N'` на section; `prefers-reduced-motion` отключает.
-11. **Модальные окна** — проверить enter/exit у shadcn/base-ui диалогов, добавить модал выбора команды для общего слова в этот список.
+11. ~~**Модальные окна**~~ ✅ Проверено: `alert-dialog` и `dialog` (shadcn/base-ui) уже имеют enter/exit (`animate-in`/`fade-in-0`/`zoom-in-95` + обратные на закрытие) через `tw-animate-css`; модал выбора команды общего слова использует `AlertDialog` и покрыт. Длительности смягчены со 100 до 200 мс в обоих примитивах.
 
 #### Технические требования
 
