@@ -24,6 +24,9 @@ export default function LoginPage() {
 					<CardTitle className='flex justify-center'>
 						<Image src='/logo-transparent.svg' alt='Alias' width={180} height={60} className='h-auto w-44' />
 					</CardTitle>
+					<p className='text-center text-sm text-muted-foreground'>
+						Объясняй как хочешь, только не само слово
+					</p>
 				</CardHeader>
 
 				<CardContent>
