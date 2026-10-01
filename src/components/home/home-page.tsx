@@ -87,7 +87,7 @@ export function HomePage({ nickname, activeGame }: HomePageProps) {
 					<p className='mt-2 text-sm text-muted-foreground'>Готовы сыграть?</p>
 				</div>
 
-				<div className='flex w-full max-w-sm flex-col gap-3'>
+				<div className='flex w-full max-w-sm animate-[card-enter_350ms_ease-out] flex-col gap-3'>
 					{activeGame && (
 						<Button
 							size='lg'

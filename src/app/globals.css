@@ -263,6 +263,17 @@
 	}
 }
 
+@keyframes card-enter {
+	from {
+		opacity: 0;
+		transform: translateY(1rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	[class*='animate-[word-'],
 	[class*='animate-[timer-'],
@@ -270,7 +281,8 @@
 	[class*='animate-[score-'],
 	[class*='animate-[shared-word-'],
 	[class*='animate-[screen-'],
-	[class*='animate-[button-'] {
+	[class*='animate-[button-'],
+	[class*='animate-[card-'] {
 		animation: none !important;
 		transition: none !important;
 	}
