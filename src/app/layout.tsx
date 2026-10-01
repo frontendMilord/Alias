@@ -13,14 +13,21 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-	title: 'Alias',
+	title: { default: 'Alias', template: '%s — Alias' },
 	description: 'Alias game',
+	icons: {
+		icon: [
+			{ url: '/favicon.svg', type: 'image/svg+xml' },
+			{ url: '/favicon.ico', sizes: 'any' },
+		],
+		apple: '/apple-touch-icon.png',
+	},
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
 	return (
 		<html
-			lang='en'
+			lang='ru'
 			className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
 		>
 			<body className='min-h-full flex flex-col'>{children}</body>

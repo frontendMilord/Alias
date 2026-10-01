@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { Gamepad2, Home, List, UserRound } from 'lucide-react'
+import Image from 'next/image'
+import { List, UserRound } from 'lucide-react'
 
 const links = [
-	{ href: '/', label: 'Главная', icon: Home },
 	{ href: '/lists', label: 'Списки', icon: List },
 	{ href: '/profile', label: 'Профиль', icon: UserRound },
 ]
@@ -12,8 +12,7 @@ export function AppHeader() {
 		<header className='sticky top-0 z-10 -mx-4 border-b bg-background/95 px-4 backdrop-blur'>
 			<div className='flex h-14 items-center justify-between gap-4'>
 				<Link href='/' className='flex items-center gap-2 font-semibold'>
-					<Gamepad2 className='size-5 text-primary' />
-					Alias
+					<Image src='/logo-transparent.svg' alt='Alias' width={100} height={32} className='h-8 w-auto' />
 				</Link>
 				<nav aria-label='Основная навигация' className='flex items-center gap-1'>
 					{links.map(({ href, label, icon: Icon }) => (

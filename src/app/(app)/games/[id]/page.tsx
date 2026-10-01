@@ -15,6 +15,9 @@ import { difficultyLabels } from '@/lib/consts'
 import { getGame } from '@/lib/games/game'
 import { requireUser } from '@/lib/auth/require-user'
 import type { GameStatus, GameTeam } from '@/types/game'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Игра' }
 
 interface GamePageProps {
 	params: Promise<{ id: string }>

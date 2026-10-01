@@ -7,6 +7,9 @@ import { pluralizeWordsCount } from '@/lib/utils'
 import { ListWords } from '@/components/lists/list-words'
 import { getListPermissions } from '@/lib/lists/get-list-permissions'
 import { getCurrentProfile } from '@/lib/auth/get-profile'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Список слов' }
 
 const permissionLabels = {
 	can_view: 'Просмотр',

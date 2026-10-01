@@ -1,6 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createClient } from '@/lib/client'
 
@@ -20,7 +21,9 @@ export default function LoginPage() {
 		<main className='flex min-h-screen items-center justify-center p-6'>
 			<Card className='w-full max-w-md'>
 				<CardHeader>
-					<CardTitle className='text-center text-2xl'>Alias</CardTitle>
+					<CardTitle className='flex justify-center'>
+						<Image src='/logo-transparent.svg' alt='Alias' width={180} height={60} className='h-auto w-44' />
+					</CardTitle>
 				</CardHeader>
 
 				<CardContent>

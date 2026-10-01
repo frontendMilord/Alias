@@ -1,4 +1,7 @@
 import { requireUser } from '@/lib/auth/require-user'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Игра' }
 
 export default async function GamePage() {
 	const profile = await requireUser()

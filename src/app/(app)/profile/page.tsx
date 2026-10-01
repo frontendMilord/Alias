@@ -2,6 +2,9 @@ import { LogoutButton } from '@/components/auth/logout-button'
 import { requireUser } from '@/lib/auth/require-user'
 import { getGameHistory } from '@/lib/games/get-game-history'
 import { GameHistory } from '@/components/profile/game-history'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Профиль' }
 
 export default async function ProfilePage() {
 	const profile = await requireUser()

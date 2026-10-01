@@ -1,4 +1,7 @@
 import { requireAdmin } from '@/lib/auth/require-admin'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Администрирование' }
 
 export default async function AdminPage() {
 	const profile = await requireAdmin()

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Play, Plus } from 'lucide-react'
+import Image from 'next/image'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -78,14 +79,15 @@ export function HomePage({ nickname, activeGame }: HomePageProps) {
 
 	return (
 		<>
-			<main className='mx-auto flex min-h-screen w-full max-w-[640px] flex-col px-4 py-6'>
-				<div className='mb-8'>
+			<main className='mx-auto flex min-h-[calc(100vh-3.5rem)] w-full max-w-[640px] flex-col items-center justify-center px-4 py-6'>
+				<div className='mb-8 flex flex-col items-center text-center'>
+					<Image src='/logo-transparent.svg' alt='Alias' width={220} height={72} priority className='mb-8 h-auto w-52' />
 					<h1 className='text-2xl font-semibold'>Привет, {nickname}! 👋</h1>
 
 					<p className='mt-2 text-sm text-muted-foreground'>Готовы сыграть?</p>
 				</div>
 
-				<div className='flex flex-col gap-3'>
+				<div className='flex w-full max-w-sm flex-col gap-3'>
 					{activeGame && (
 						<Button
 							size='lg'
