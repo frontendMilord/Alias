@@ -122,7 +122,7 @@ export default async function GamePage({ params }: GamePageProps) {
 			</header>
 
 			{game.status === 'active' && !round && (
-				<>
+				<div key='screen-setup' className='flex flex-col gap-5 animate-[screen-enter_300ms_ease-out]'>
 					<TeamsCard
 						teams={game.teams}
 						targetScore={game.targetScore}
@@ -183,11 +183,11 @@ export default async function GamePage({ params }: GamePageProps) {
 						</CardContent>
 					</Card>
 					<StartRoundButton gameId={game.id} />
-				</>
+				</div>
 			)}
 
 			{game.status === 'active' && round?.status === 'preparation' && (
-				<>
+				<div key='screen-preparation' className='flex flex-col gap-5 animate-[screen-enter_300ms_ease-out]'>
 					<TeamsCard
 						teams={game.teams}
 						targetScore={game.targetScore}
@@ -209,13 +209,13 @@ export default async function GamePage({ params }: GamePageProps) {
 						</CardContent>
 					</Card>
 					<BeginRoundButton gameId={game.id} />
-				</>
+				</div>
 			)}
 
 			{game.status === 'active' &&
 				round?.status === 'active' &&
 				!round.endedAt && (
-					<>
+					<div key='screen-active' className='flex flex-col gap-5 animate-[screen-enter_300ms_ease-out]'>
 						<p className='text-center text-lg font-medium'>
 							Ход команды «{currentTeam?.name ?? '—'}», объясняет{' '}
 							{currentPlayer?.nickname ?? '—'}.
@@ -237,7 +237,7 @@ export default async function GamePage({ params }: GamePageProps) {
 								Раунд ожидает запуска.
 							</p>
 						)}
-					</>
+					</div>
 				)}
 
 			{game.status === 'active' &&
@@ -257,7 +257,7 @@ export default async function GamePage({ params }: GamePageProps) {
 
 			{game.status === 'active' &&
 				(round?.status === 'result' || round?.status === 'finished') && (
-				<>
+				<div key='screen-result' className='flex flex-col gap-5 animate-[screen-enter_300ms_ease-out]'>
 					<TeamsCard
 						teams={game.teams}
 						targetScore={game.targetScore}
@@ -274,7 +274,7 @@ export default async function GamePage({ params }: GamePageProps) {
 						lastWordTeamId={lastWordTeamId}
 						canAdvance={game.status === 'active' && round.status === 'result'}
 					/>
-				</>
+				</div>
 			)}
 
 			{game.status === 'finished' && (

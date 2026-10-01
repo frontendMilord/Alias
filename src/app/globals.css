@@ -229,12 +229,24 @@
 	}
 }
 
+@keyframes screen-enter {
+	from {
+		opacity: 0;
+		transform: translateY(0.75rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	[class*='animate-[word-'],
 	[class*='animate-[timer-'],
 	[class*='animate-[pause-'],
 	[class*='animate-[score-'],
-	[class*='animate-[shared-word-'] {
+	[class*='animate-[shared-word-'],
+	[class*='animate-[screen-'] {
 		animation: none !important;
 		transition: none !important;
 	}
