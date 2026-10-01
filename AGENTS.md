@@ -252,7 +252,7 @@ RLS включён на всех 13 таблицах `public`; `FORCE ROW LEVEL 
 10. ~~**Мастер создания игры**~~ ✅ Реализовано в `new-game-page.tsx` + `globals.css`: direction-aware slide (вперёд — справа налево `step-forward`, назад — слева направо `step-back`, 300 мс) через `stepDirection`-state + `key='wizard-step-N'` на section; `prefers-reduced-motion` отключает.
 11. ~~**Модальные окна**~~ ✅ Проверено: `alert-dialog` и `dialog` (shadcn/base-ui) уже имеют enter/exit (`animate-in`/`fade-in-0`/`zoom-in-95` + обратные на закрытие) через `tw-animate-css`; модал выбора команды общего слова использует `AlertDialog` и покрыт. Длительности смягчены со 100 до 200 мс в обоих примитивах.
 
-12. ~~**Конфетти при завершении игры**~~ ✅ Реализовано в `confetti-overlay.tsx` (новый компонент) + `finished-game-panel.tsx` + `globals.css`: 80 частиц, 8 цветов, случайные позиция/задержка (до 2 с)/длительность (4–7.5 с), `confetti-fall` (падение + rotate 720° + drift 3vw), `pointer-events-none`, `aria-hidden`, `prefers-reduced-motion` отключает.
+12. ~~**Конфетти при завершении игры**~~ ✅ Реализовано в `confetti-overlay.tsx` (новый компонент) + `finished-game-panel.tsx` + `globals.css`: 160 частиц, 8 цветов, случайные позиция/задержка (до 4 с)/длительность (6–11 с), `confetti-fall` (падение + rotate 1440° + двусторонний drift −2vw→4vw), `pointer-events-none`, `aria-hidden`, `prefers-reduced-motion` отключает.
 
 #### Технические требования
 

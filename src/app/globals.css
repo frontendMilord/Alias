@@ -302,13 +302,14 @@
 		opacity: 1;
 		transform: translateX(0) rotate(0deg);
 	}
-	25% {
+	40% {
 		opacity: 1;
+		transform: translateX(-2vw) rotate(480deg);
 	}
 	100% {
 		top: 105vh;
-		opacity: 0.6;
-		transform: translateX(3vw) rotate(720deg);
+		opacity: 0.5;
+		transform: translateX(4vw) rotate(1440deg);
 	}
 }
 

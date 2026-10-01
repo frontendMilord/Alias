@@ -13,7 +13,7 @@ const CONFETTI_COLORS = [
 	'#f97316',
 ]
 
-const CONFETTI_COUNT = 80
+const CONFETTI_COUNT = 160
 
 interface ConfettiPiece {
 	id: number
@@ -27,11 +27,11 @@ interface ConfettiPiece {
 
 function createPieces(): ConfettiPiece[] {
 	return Array.from({ length: CONFETTI_COUNT }, (_, index) => {
-		const duration = 4 + Math.random() * 3.5
+		const duration = 6 + Math.random() * 5
 		return {
 			id: index,
 			left: Math.random() * 100,
-			delay: Math.random() * 2,
+			delay: Math.random() * 4,
 			duration,
 			color: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
 			size: 6 + Math.random() * 6,
@@ -54,8 +54,14 @@ export function ConfettiOverlay() {
 					className='absolute animate-[confetti-fall_linear_forwards] rounded-[1px]'
 					style={{
 						left: `${piece.left}%`,
-						width: piece.shape === 'rect' ? `${piece.size}px` : `${piece.size / 2}px`,
-						height: piece.shape === 'rect' ? `${piece.size / 1.8}px` : `${piece.size / 2}px`,
+						width:
+							piece.shape === 'rect'
+								? `${piece.size}px`
+								: `${piece.size / 2}px`,
+						height:
+							piece.shape === 'rect'
+								? `${piece.size / 1.8}px`
+								: `${piece.size / 2}px`,
 						backgroundColor: piece.color,
 						borderRadius: piece.shape === 'circle' ? '9999px' : '1px',
 						animationDelay: `${piece.delay}s`,
