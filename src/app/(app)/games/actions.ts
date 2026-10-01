@@ -92,7 +92,12 @@ export async function resolveCurrentRoundWord(
 		p_result: result,
 	})
 	if (error) {
-		console.error('Error resolving current round word:', error)
+		console.error('Error resolving current round word:', {
+			code: error.code,
+			message: error.message,
+			details: error.details,
+			hint: error.hint,
+		})
 		return { success: false, error: 'Не удалось сохранить результат слова.' }
 	}
 

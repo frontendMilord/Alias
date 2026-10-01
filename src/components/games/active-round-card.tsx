@@ -48,6 +48,7 @@ export function ActiveRoundCard({
 	const [error, setError] = useState<string | null>(null)
 	const [isResolving, setIsResolving] = useState(false)
 	const expiryRequested = useRef(false)
+	const pauseOnLeaveRequested = useRef(false)
 	const [remainingSeconds, setRemainingSeconds] = useState(() =>
 		Math.max(
 			0,
@@ -59,7 +60,6 @@ export function ActiveRoundCard({
 			),
 		),
 	)
-
 	useEffect(() => {
 		const updateRemaining = () => {
 			if (pausedAt) return
@@ -84,6 +84,27 @@ export function ActiveRoundCard({
 			if (interval !== undefined) window.clearInterval(interval)
 		}
 	}, [durationSeconds, pausedAt, pausedSeconds, startedAt])
+
+	useEffect(() => {
+		const pauseWhenLeaving = () => {
+			if (isPaused || pauseOnLeaveRequested.current || remainingSeconds === 0) return
+			pauseOnLeaveRequested.current = true
+			void setGameRoundPaused(gameId, true).then((result) => {
+				if (!result.success) pauseOnLeaveRequested.current = false
+			})
+		}
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === 'hidden') pauseWhenLeaving()
+			if (document.visibilityState === 'visible') router.refresh()
+		}
+
+		document.addEventListener('visibilitychange', handleVisibilityChange)
+		window.addEventListener('pagehide', pauseWhenLeaving)
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange)
+			window.removeEventListener('pagehide', pauseWhenLeaving)
+		}
+	}, [gameId, isPaused, remainingSeconds, router])
 
 	const handleResolveWord = useCallback(
 		async (result: 'guessed' | 'skipped') => {

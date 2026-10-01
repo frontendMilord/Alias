@@ -20,18 +20,24 @@ export default function LoginPage() {
 	return (
 		<main className='flex min-h-screen items-center justify-center p-6'>
 			<Card className='w-full max-w-md'>
-				<CardHeader>
+				<CardHeader className='gap-y-2'>
 					<CardTitle className='flex justify-center'>
-						<Image src='/logo-transparent.svg' alt='Alias' width={180} height={60} className='h-auto w-44' />
+						<Image
+							src='/logo-transparent.svg'
+							alt='Alias'
+							width={210}
+							height={70}
+							className='h-auto w-52'
+						/>
 					</CardTitle>
-					<p className='text-center text-sm text-muted-foreground'>
+					<p className='text-center text-base text-muted-foreground'>
 						Объясняй как хочешь, только не само слово
 					</p>
 				</CardHeader>
 
-				<CardContent>
+				<CardContent className='mt-2'>
 					<Button
-						className='w-full'
+						className='w-full font-medium'
 						onClick={handleGoogleLogin}
 					>
 						Войти через Google

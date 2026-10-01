@@ -264,18 +264,18 @@ RLS включён на всех 13 таблицах `public`; `FORCE ROW LEVEL 
   слова, общего слова после окончания таймера и завершения игры.
 - Обновить `README.md`: описать реализованные возможности веб-версии, которых нет
   в оригинальной игре.
-- Завершить игровой UI по согласованным состояниям: проверить результаты, закрытие
-  игры, переходы между раундами и пересчёт счёта.
 - Добавить реалтайм-синхронизацию состояния игры между участниками (Supabase
   Realtime подключений пока в коде нет).
 - Разобраться с легаси-папкой `src/app/(app)/game/` (singular): сейчас там
   находится `cancelGame`, используемый главной страницей. При переносе обновить
   импорты; решить, нужна ли заглушка маршрута `/game`.
 - Обновить UI страницы профиля
-- Добавить названия страниц в заголовки
-- Поменять иконку сайта
 - Проверить нужна ли валидация форм
-- На главной страницу сделать кнопку новая игра посередине экрана(по высоте), а если еще есть кнопка продолжить игру то их вместе по середине
+- fix Image with src "/logo-transparent.svg" was detected as the Largest Contentful Paint (LCP).
+  Please add the `loading="eager"` property if this image is above the fold.
+  Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+  overrideMethod @ installHook.js:1
+  installHook.js:1 Image with src "http://localhost:3000/logo-transparent.svg" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
 
 ### Целевой UI игрового цикла
 
