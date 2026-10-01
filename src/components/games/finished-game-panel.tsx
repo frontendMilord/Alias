@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Check, Clock3, Home, Plus, Trophy } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
+import { ConfettiOverlay } from '@/components/games/confetti-overlay'
 import type { FinishedGameSummary, GameTeam } from '@/types/game'
 
 interface FinishedGamePanelProps {
@@ -30,7 +31,9 @@ export function FinishedGamePanel({
 	const teamNames = new Map(teams.map((team) => [team.id, team.name]))
 
 	return (
-		<div className='space-y-4'>
+		<>
+			<ConfettiOverlay />
+			<div className='space-y-4'>
 			<Card className='border-primary/40'>
 				<CardHeader>
 					<CardTitle className='flex items-center gap-2'>
@@ -166,5 +169,6 @@ export function FinishedGamePanel({
 				</Link>
 			</div>
 		</div>
+		</>
 	)
 }

@@ -296,6 +296,22 @@
 	}
 }
 
+@keyframes confetti-fall {
+	0% {
+		top: -2vh;
+		opacity: 1;
+		transform: translateX(0) rotate(0deg);
+	}
+	10% {
+		opacity: 1;
+	}
+	100% {
+		top: 105vh;
+		opacity: 0.6;
+		transform: translateX(3vw) rotate(720deg);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	[class*='animate-[word-'],
 	[class*='animate-[timer-'],
@@ -305,7 +321,8 @@
 	[class*='animate-[screen-'],
 	[class*='animate-[button-'],
 	[class*='animate-[card-'],
-	[class*='animate-[step-'] {
+	[class*='animate-[step-'],
+	[class*='animate-[confetti-'] {
 		animation: none !important;
 		transition: none !important;
 	}
