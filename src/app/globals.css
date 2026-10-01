@@ -151,8 +151,21 @@
 	}
 }
 
+@keyframes timer-pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.75;
+		transform: scale(1.08);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
-	[class*='animate-[word-'] {
+	[class*='animate-[word-'],
+	[class*='animate-[timer-'] {
 		animation: none !important;
 		transition: none !important;
 	}

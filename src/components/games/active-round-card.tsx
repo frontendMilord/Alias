@@ -195,7 +195,18 @@ export function ActiveRoundCard({
 					title={isPaused ? 'Продолжить раунд' : 'Поставить раунд на паузу'}
 				>
 					{isPaused ? <Play className='size-4' /> : <Pause className='size-4' />}
-					<output aria-live='off'>{formatTime(remainingSeconds)}</output>
+					<output
+							aria-live='off'
+							className={
+								remainingSeconds > 10
+									? undefined
+									: remainingSeconds <= 5
+										? 'animate-[timer-pulse_1s_ease-in-out_infinite] text-red-600 transition-colors duration-300 dark:text-red-400'
+										: 'text-amber-600 transition-colors duration-300 dark:text-amber-400'
+							}
+						>
+							{formatTime(remainingSeconds)}
+						</output>
 				</Button>
 			</CardHeader>
 			<CardContent
