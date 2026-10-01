@@ -244,7 +244,7 @@ RLS включён на всех 13 таблицах `public`; `FORCE ROW LEVEL 
 #### Средний приоритет
 
 7. ~~**Подготовка раунда**~~ ✅ Реализовано в `begin-round-button.tsx` + `globals.css`: `button-pulse` (2 с, opacity 1→0.85 + scale 1.02) — мягкий цикличный пульс без bounce; отключается при `isStarting`; `prefers-reduced-motion` отключает.
-8. **Результаты: редактируемый список слов** — flash строки при изменении результата + анимированный пересчёт очков, чтобы была видна связь «правка → итог».
+8. ~~**Результаты: редактируемый список слов**~~ ✅ Реализовано в `round-results-panel.tsx` + `globals.css`: flash изменённой строки (`word-flash`, 600 мс, primary 15% → transparent) через previousResults-сравнение; пересчёт очков уже покрыт `score-pop` + тостом из п.4; `prefers-reduced-motion` отключает.
 
 #### Низкий приоритет
 

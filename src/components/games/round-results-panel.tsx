@@ -39,11 +39,30 @@ export function RoundResultsPanel({
 	const [updatingWordId, setUpdatingWordId] = useState<string | null>(null)
 	const [error, setError] = useState<string | null>(null)
 	const [pointsDelta, setPointsDelta] = useState<number | null>(null)
+	const [flashedWordId, setFlashedWordId] = useState<string | null>(null)
+	const [previousResults, setPreviousResults] = useState<Record<string, string | null>>(
+		() => Object.fromEntries(words.map((word) => [word.id, word.result])),
+	)
+	const resultsChanged = words.some(
+		(word) => previousResults[word.id] !== word.result,
+	)
+	if (resultsChanged) {
+		const changed = words.find((word) => previousResults[word.id] !== word.result)
+		setPreviousResults(Object.fromEntries(words.map((word) => [word.id, word.result])))
+		if (changed) setFlashedWordId(changed.id)
+	}
 	const [previousPoints, setPreviousPoints] = useState(pointsEarned)
 	if (pointsEarned !== previousPoints) {
 		setPreviousPoints(pointsEarned)
 		setPointsDelta(pointsEarned - previousPoints)
 	}
+	useEffect(() => {
+		if (flashedWordId !== null) {
+			const timeout = window.setTimeout(() => setFlashedWordId(null), 600)
+			return () => window.clearTimeout(timeout)
+		}
+	}, [flashedWordId])
+
 	useEffect(() => {
 		if (pointsDelta === null) return
 		const timeout = window.setTimeout(() => setPointsDelta(null), 2500)
@@ -121,7 +140,7 @@ export function RoundResultsPanel({
 						return (
 							<div
 								key={word.id}
-								className='flex items-center justify-between gap-3 rounded-md border p-3'
+								className={flashedWordId === word.id ? 'flex items-center justify-between gap-3 rounded-md border p-3 animate-[word-flash_600ms_ease-out]' : 'flex items-center justify-between gap-3 rounded-md border p-3'}
 							>
 								<p className='min-w-0 truncate font-medium'>{word.wordText}</p>
 								<Button
