@@ -249,7 +249,7 @@ RLS включён на всех 13 таблицах `public`; `FORCE ROW LEVEL 
 #### Низкий приоритет
 
 9. ~~**Главная**~~ ✅ Реализовано в `home-page.tsx` + `globals.css`: `card-enter` (350 мс, fade + slide-up 1rem) на блоке кнопок; играет однократно при монтировании; `prefers-reduced-motion` отключает.
-10. **Мастер создания игры** — горизонтальный slide между 4 шагами (направление-aware: вперёд — влево, назад — вправо).
+10. ~~**Мастер создания игры**~~ ✅ Реализовано в `new-game-page.tsx` + `globals.css`: direction-aware slide (вперёд — справа налево `step-forward`, назад — слева направо `step-back`, 300 мс) через `stepDirection`-state + `key='wizard-step-N'` на section; `prefers-reduced-motion` отключает.
 11. **Модальные окна** — проверить enter/exit у shadcn/base-ui диалогов, добавить модал выбора команды для общего слова в этот список.
 
 #### Технические требования

@@ -36,6 +36,12 @@ type GameStep = 1 | 2 | 3 | 4
 
 export function NewGamePage({ lists, profile }: NewGamePageProps) {
 	const [step, setStep] = useState<GameStep>(1)
+	const [stepDirection, setStepDirection] = useState<'forward' | 'back'>('forward')
+	const [previousStep, setPreviousStep] = useState<GameStep>(1)
+	if (step !== previousStep) {
+		setPreviousStep(step)
+		setStepDirection(step > previousStep ? 'forward' : 'back')
+	}
 	const [teams, setTeams] = useState<GameTeamDraft[]>([
 		createTeam(1),
 		createTeam(2),
@@ -314,7 +320,10 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 				</p>
 			</div>
 			{step === 1 && (
-				<section className='space-y-4'>
+				<section
+					key='wizard-step-1'
+					className={stepDirection === 'forward' ? 'space-y-4 animate-[step-forward_300ms_ease-out]' : 'space-y-4 animate-[step-back_300ms_ease-out]'}
+				>
 					<div className='flex items-center justify-between'>
 						<h2 className='text-lg font-medium'>Команды</h2>
 						<span className='text-sm text-muted-foreground'>
@@ -346,7 +355,10 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 				</section>
 			)}
 			{step === 2 && (
-				<section className='space-y-4'>
+				<section
+					key='wizard-step-2'
+					className={stepDirection === 'forward' ? 'space-y-4 animate-[step-forward_300ms_ease-out]' : 'space-y-4 animate-[step-back_300ms_ease-out]'}
+				>
 					<div className='space-y-2'>
 						<label className='text-sm font-medium'>Очки для победы</label>
 
@@ -481,7 +493,10 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 				</section>
 			)}
 			{step === 3 && (
-				<section className='space-y-4'>
+				<section
+					key='wizard-step-3'
+					className={stepDirection === 'forward' ? 'space-y-4 animate-[step-forward_300ms_ease-out]' : 'space-y-4 animate-[step-back_300ms_ease-out]'}
+				>
 					<div className='flex flex-wrap gap-2'>
 						{(Object.keys(listTypeLabels) as ListType[]).map((value) => {
 							const checked = selectedTypes.includes(value)
@@ -592,7 +607,10 @@ export function NewGamePage({ lists, profile }: NewGamePageProps) {
 			)}
 
 			{step === 4 && (
-				<section className='space-y-4'>
+				<section
+					key='wizard-step-4'
+					className={stepDirection === 'forward' ? 'space-y-4 animate-[step-forward_300ms_ease-out]' : 'space-y-4 animate-[step-back_300ms_ease-out]'}
+				>
 					<div className='rounded-lg border p-4'>
 						<h2 className='text-lg font-medium'>Команды</h2>
 

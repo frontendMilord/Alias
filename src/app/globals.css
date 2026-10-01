@@ -274,6 +274,28 @@
 	}
 }
 
+@keyframes step-forward {
+	from {
+		opacity: 0;
+		transform: translateX(1.5rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes step-back {
+	from {
+		opacity: 0;
+		transform: translateX(-1.5rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	[class*='animate-[word-'],
 	[class*='animate-[timer-'],
@@ -282,7 +304,8 @@
 	[class*='animate-[shared-word-'],
 	[class*='animate-[screen-'],
 	[class*='animate-[button-'],
-	[class*='animate-[card-'] {
+	[class*='animate-[card-'],
+	[class*='animate-[step-'] {
 		animation: none !important;
 		transition: none !important;
 	}
