@@ -3,6 +3,7 @@ import { Check, Clock3, Home, Plus, Trophy } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 import { ConfettiOverlay } from '@/components/games/confetti-overlay'
+import { GameFinishedSound } from '@/components/games/game-finished-sound'
 import type { FinishedGameSummary, GameTeam } from '@/types/game'
 
 interface FinishedGamePanelProps {
@@ -33,6 +34,7 @@ export function FinishedGamePanel({
 	return (
 		<>
 			<ConfettiOverlay />
+			<GameFinishedSound />
 			<div className='space-y-4'>
 			<Card className='border-primary/40'>
 				<CardHeader>

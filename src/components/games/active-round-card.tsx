@@ -10,6 +10,7 @@ import {
 	setGameRoundPaused,
 } from '@/app/(app)/games/actions'
 import { useRouter } from 'next/navigation'
+import { playGameSound } from '@/lib/sounds'
 
 interface ActiveRoundCardProps {
 	word: string
@@ -118,6 +119,7 @@ export function ActiveRoundCard({
 		async (result: 'guessed' | 'skipped') => {
 			if (wordAnimation?.startsWith('exit')) return
 			setError(null)
+			playGameSound(result === 'guessed' ? 'word-guessed' : 'word-skipped')
 			setWordAnimation(result === 'guessed' ? 'exit-guessed' : 'exit-skipped')
 			await new Promise((resolve) => setTimeout(resolve, 220))
 			setIsResolving(true)
@@ -153,6 +155,7 @@ export function ActiveRoundCard({
 	}, [gameId, remainingSeconds, router])
 
 	const handlePause = async () => {
+		playGameSound(isPaused ? 'round-resumed' : 'round-paused')
 		setIsUpdatingPause(true)
 		setError(null)
 		try {

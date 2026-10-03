@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +12,7 @@ import {
 	AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { assignSharedWordTeam } from '@/app/(app)/games/actions'
+import { playGameSound } from '@/lib/sounds'
 
 interface TeamOption {
 	id: string
@@ -38,6 +39,10 @@ export function SharedWordPanel({
 	const [isSaving, setIsSaving] = useState(false)
 	const [error, setError] = useState<string | null>(null)
 	const currentTeam = teams.find((team) => team.id === currentTeamId)
+
+	useEffect(() => {
+		if (!allowClose) playGameSound('shared-word')
+	}, [allowClose])
 
 	const saveTeam = async (teamId: string) => {
 		setIsSaving(true)

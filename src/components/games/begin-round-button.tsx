@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { beginPreparedGameRound } from '@/app/(app)/games/actions'
+import { playGameSound } from '@/lib/sounds'
 
 export function BeginRoundButton({ gameId }: { gameId: string }) {
 	const router = useRouter()
@@ -11,6 +12,7 @@ export function BeginRoundButton({ gameId }: { gameId: string }) {
 	const [error, setError] = useState<string | null>(null)
 
 	const handleStart = async () => {
+		playGameSound('round-start')
 		setIsStarting(true)
 		setError(null)
 		try {
